@@ -145,8 +145,14 @@ public sealed class BigBirdCharmedPower : LibraryOfRuinaPowerModel
             return true;
         }
 
+        // 勾魂只限制普通牌，状态牌与诅咒牌继续遵循各自的出牌规则。
+        if (card.Type is CardType.Status or CardType.Curse)
+        {
+            return true;
+        }
+
         bool handHasSoulSnare = HandContains<SoulSnareStatusCard>(card.Owner);
-        if (!handHasSoulSnare || card is SoulSnareStatusCard)
+        if (!handHasSoulSnare)
         {
             return true;
         }
