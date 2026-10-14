@@ -43,5 +43,10 @@
   "LIBRARYOFRUINA-INJECTION_MISMATCH.host_injected": "房主正在使用废墟图书馆内容，但本机这次启动没有加载废墟图书馆内容（“启用废墟图书馆内容”已关闭，或检测到不兼容模组）。继续游戏会导致两端不同步。请开启该设置并重启游戏后再加入。",
   "LIBRARYOFRUINA-INJECTION_MISMATCH.host_not_injected": "房主这次启动没有加载废墟图书馆内容（“启用废墟图书馆内容”已关闭，或检测到不兼容模组），而本机已加载。继续游戏会导致两端不同步。双方需要保持一致：在本机关闭该设置并重启游戏，或者请房主开启该设置并重启游戏。",
   "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.title": "关于意图图",
-  "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.body": "检测到 Chaofan 的创意工坊模组 Intent Graph（3747528152）。\n本模组的意图图改编自 Intent Graph，用于显示废墟图书馆怪物特有的意图：悬停废墟图书馆怪物时，Intent Graph 面板里会显示本模组的意图图；面板的位置、固定与缩放仍按 Intent Graph 的设置。其他怪物不受影响。\n如原作者提出要求，本功能将被移除。"
+  "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.body": "检测到 Chaofan 的创意工坊模组 Intent Graph（3747528152）。\n本模组的意图图改编自 Intent Graph，用于显示废墟图书馆怪物特有的意图：悬停废墟图书馆怪物时，Intent Graph 面板里会显示本模组的意图图；面板的位置、固定与缩放仍按 Intent Graph 的设置。其他怪物不受影响。\n如原作者提出要求，本功能将被移除。",
+  "LIBRARYOFRUINA-HOST_SETTINGS_NOTICE.title": "玩法与战斗动画由房主在开局时统一分发，本局固定。音量、语言、教程和界面保留个人设置。",
+  "LIBRARYOFRUINA-SECOND_ASCENSION_LEVEL.title": "第二进阶等级",
+  "LIBRARYOFRUINA-RUN_SETTINGS_NOTICE.title": "本局玩法与战斗动画设置（联机采用房主配置，只读；个人偏好保留）：",
+  "LIBRARYOFRUINA-SETTING_DISABLED.title": "关闭",
+  "LIBRARYOFRUINA-SETTING_ENABLED.title": "开启"
 }

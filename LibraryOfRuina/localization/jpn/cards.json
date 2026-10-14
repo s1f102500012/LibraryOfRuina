@@ -290,7 +290,7 @@
   "SMILING_BODIES_CORPSE_LAUGHS_CHOICE_CARD.title": "笑う死体",
   "SMILING_BODIES_CORPSE_LAUGHS_CHOICE_CARD.description": "HPが[blue]{LowHpThresholdPercent}%[/blue]未満の間、[gold]ブロックされなかったダメージ[/gold]を受けるたび、すべての敵に[red]{ChaosDamage}[/red][gold]混乱ダメージ[/gold]を与え、永続的な[gold]脆弱[/gold][blue]{Vulnerable}[/blue]を付与する。",
   "SMILING_BODIES_CORPSE_ABSORPTION_CHOICE_CARD.title": "死体吸収",
-  "SMILING_BODIES_CORPSE_ABSORPTION_CHOICE_CARD.description": "敵を倒すたび、最大HPの[green]{HealPercent}%[/green]分のHPを回復する。1戦闘につき[blue]{HealUses}[/blue]回まで発動する。ターン開始時、この戦闘で回復したHPの合計が最大HPの10%に達するごとに、永続的な[gold]威力増加[/gold][blue]1[/blue]を得る。",
+  "SMILING_BODIES_CORPSE_ABSORPTION_CHOICE_CARD.description": "敵を倒すたび、最大HPの[green]{HealPercent}%[/green]分のHPを回復する。1戦闘につき[blue]{HealUses}[/blue]回まで発動する。ターン開始時、この戦闘で回復したHPの合計が最大HPの{StrongHealPercent}%に達するごとに、永続的な[gold]威力増加[/gold][blue]{StrongPerThreshold}[/blue]を得る。",
   "SMILING_BODIES_CORPSE_MOUNTAIN_CHOICE_CARD.title": "屍山",
   "SMILING_BODIES_CORPSE_MOUNTAIN_CHOICE_CARD.description": "[lb][gold]右クリック[/gold][rb]\n自分以外のすべての[gold]味方[/gold]を即座に倒す。1人倒すごとに、永続的な[gold]威力増加[/gold]、[gold]忍耐[/gold]、[gold]迅速[/gold]を[blue]{AllyBuffs}[/blue]ずつ得て、この戦闘中[gold]最大エナジー[/gold]が[blue]{EnergyBonus}[/blue]増加する。使用するたび、最大HPが[red]{MaxHpLossPercent}%[/red]減少する。クールダウン：[blue]{Cooldown}[/blue]ターン。",
   "BIG_BAD_WOLF_PREDATORY_INSTINCT_CHOICE_CARD.title": "捕食本能",

@@ -123,3 +123,17 @@ internal static class MonsterExtensionEventRelicPoolGatePatch
         __result = __result.Where(relic => !MonsterExtensionRuntimeGate.IsInjectedByThisMod(relic));
     }
 }
+
+// 内容始终注册以支持客机自动跟随；关闭内容的局从可抽取卡池中排除本模组卡牌。
+[HarmonyPatch(typeof(CardPoolModel), nameof(CardPoolModel.GetUnlockedCards))]
+internal static class MonsterExtensionCardPoolGatePatch
+{
+    [HarmonyPostfix]
+    private static void Postfix(ref IEnumerable<CardModel> __result)
+    {
+        if (!LibraryRunSettings.MonsterExtensionEnabled)
+        {
+            __result = __result.Where(card => !MonsterExtensionRuntimeGate.IsInjectedByThisMod(card));
+        }
+    }
+}

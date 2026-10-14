@@ -43,5 +43,10 @@
   "LIBRARYOFRUINA-INJECTION_MISMATCH.host_injected": "ホストはLibrary of Ruinaのコンテンツを使用していますが、このPCでは今回の起動でLibrary of Ruinaのコンテンツが読み込まれていません（「Library of Ruinaのコンテンツを有効化」がオフ、または互換性のないMODを検出）。このまま続けると同期がずれます。設定をオンにしてゲームを再起動し、もう一度参加してください。",
   "LIBRARYOFRUINA-INJECTION_MISMATCH.host_not_injected": "ホストは今回の起動でLibrary of Ruinaのコンテンツを読み込んでいません（「Library of Ruinaのコンテンツを有効化」がオフ、または互換性のないMODを検出）が、このPCでは読み込まれています。このまま続けると同期がずれます。両者を揃えてください：このPCで設定をオフにしてゲームを再起動するか、ホストに設定をオンにしてゲームを再起動してもらってください。",
   "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.title": "インテントグラフについて",
-  "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.body": "Chaofan氏のワークショップMOD「Intent Graph」（3747528152）を検出しました。\n本MODのインテントグラフは Intent Graph を図書館の敵独自のインテントを表示するために改変したものです。図書館の敵にカーソルを合わせると、Intent Graph のパネルに本MODのグラフが表示されます。パネルの位置・固定・拡大率は Intent Graph の設定に従います。その他の敵には影響しません。\n原作者から要望があった場合、この機能は削除されます。"
+  "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.body": "Chaofan氏のワークショップMOD「Intent Graph」（3747528152）を検出しました。\n本MODのインテントグラフは Intent Graph を図書館の敵独自のインテントを表示するために改変したものです。図書館の敵にカーソルを合わせると、Intent Graph のパネルに本MODのグラフが表示されます。パネルの位置・固定・拡大率は Intent Graph の設定に従います。その他の敵には影響しません。\n原作者から要望があった場合、この機能は削除されます。",
+  "LIBRARYOFRUINA-HOST_SETTINGS_NOTICE.title": "ゲームプレイと戦闘アニメーションの設定は開始時にホストから共有され、そのラン中は固定されます。音量・言語・チュートリアル・UIは個人設定です。",
+  "LIBRARYOFRUINA-SECOND_ASCENSION_LEVEL.title": "第二昇華レベル",
+  "LIBRARYOFRUINA-RUN_SETTINGS_NOTICE.title": "このランのゲームプレイと戦闘アニメーション設定（マルチではホスト設定、変更不可。個人設定は保持）：",
+  "LIBRARYOFRUINA-SETTING_DISABLED.title": "オフ",
+  "LIBRARYOFRUINA-SETTING_ENABLED.title": "オン"
 }

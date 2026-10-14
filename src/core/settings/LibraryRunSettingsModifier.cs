@@ -6,7 +6,7 @@ using MegaCrit.Sts2.Core.Saves.Runs;
 namespace LibraryOfRuina.core.settings;
 
 /// <summary>
-/// 本局的玩法设置：是否启用废墟图书馆内容、抗性模式。局内一律读这份，不读本地设置。
+/// 本局的玩法与战斗动画设置。第二进阶实际等级由独立载体保存；局内按房主的载体读取。
 /// <para>
 /// 值由开局的一端决定：单人是本机，联机是房主。房主开局时按本地设置创建，随原版开局消息
 /// <c>LobbyBeginRunMessage.modifiers</c> 发给各端；之后随 <c>SerializableRun.Modifiers</c> 存档，
@@ -27,6 +27,22 @@ public sealed class LibraryRunSettingsModifier : ModifierModel
     [SavedProperty]
     public int LibraryOfRuina_RunResistanceMode { get; set; } = LibraryOfRuinaSettings.NormalResistanceSetting;
 
+    // 旧存档没有版本标记；房主规范化存档时一次性补齐新增设置，之后各端读取同一份值。
+    [SavedProperty]
+    public int LibraryOfRuina_RunSettingsVersion { get; set; }
+
+    [SavedProperty]
+    public bool LibraryOfRuina_RunVanillaCharacterProtectionEnabled { get; set; } = true;
+
+    [SavedProperty]
+    public bool LibraryOfRuina_RunExperimentalContentEnabled { get; set; }
+
+    [SavedProperty]
+    public bool LibraryOfRuina_RunSecondAscensionEnabled { get; set; }
+
+    [SavedProperty]
+    public bool LibraryOfRuina_RunAnimationEffectsEnabled { get; set; } = true;
+
     public bool MonsterExtensionEnabled => LibraryOfRuina_RunMonsterExtensionEnabled;
 
     public LibraryResistanceMode ResistanceMode =>
@@ -43,7 +59,17 @@ public sealed class LibraryRunSettingsModifier : ModifierModel
         var carrier = (LibraryRunSettingsModifier)ModelDb.Modifier<LibraryRunSettingsModifier>().ToMutable();
         carrier.LibraryOfRuina_RunMonsterExtensionEnabled = LibraryOfRuinaSettings.MonsterExtensionEnabled;
         carrier.LibraryOfRuina_RunResistanceMode = LibraryOfRuinaSettings.ResistanceSettingLevel;
+        carrier.CaptureAdditionalLocalSettings();
         return carrier;
+    }
+
+    internal void CaptureAdditionalLocalSettings()
+    {
+        LibraryOfRuina_RunSettingsVersion = 1;
+        LibraryOfRuina_RunVanillaCharacterProtectionEnabled = LibraryOfRuinaSettings.VanillaCharacterProtectionEnabled;
+        LibraryOfRuina_RunExperimentalContentEnabled = LibraryOfRuinaSettings.ExperimentalContentEnabled;
+        LibraryOfRuina_RunSecondAscensionEnabled = LibraryOfRuinaSettings.SecondAscensionEnabled;
+        LibraryOfRuina_RunAnimationEffectsEnabled = LibraryOfRuinaSettings.AnimationEffectsEnabled;
     }
 
     // 原版在 InitializeNewRun / InitializeSavedRun 里对 RunState.Modifiers 逐个调用，两端对称；

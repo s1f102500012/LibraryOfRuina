@@ -24,6 +24,8 @@ public abstract class SmilingBodiesPageChoiceCardBase : PageChoiceCard<SmilingBo
         new DynamicVar("Vulnerable", SmilingBodiesPageRelic.CorpseLaughsVulnerable),
         new DynamicVar("HealPercent", SmilingBodiesPageRelic.AbsorptionHealPercent),
         new DynamicVar("HealUses", SmilingBodiesPageRelic.AbsorptionMaxHealsPerCombat),
+        new DynamicVar("StrongHealPercent", SmilingBodiesPageRelic.AbsorptionHealPercentPerStrong),
+        new DynamicVar("StrongPerThreshold", SmilingBodiesPageRelic.AbsorptionStrongPerHealThreshold),
         new DynamicVar("AllyBuffs", SmilingBodiesPageRelic.CorpseMountainBuffStacks),
         new DynamicVar("EnergyBonus", SmilingBodiesPageRelic.CorpseMountainEnergyBonusPerAlly),
         new DynamicVar("Cooldown", SmilingBodiesPageRelic.CorpseMountainCooldown),
@@ -47,7 +49,7 @@ public abstract class SmilingBodiesPageChoiceCardBase : PageChoiceCard<SmilingBo
             ? Math.Max(1, (int)Math.Ceiling(ownerMaxHp * SmilingBodiesPageRelic.AbsorptionHealPercent / 100m))
             : 0;
         DynamicVars["HealThreshold"].BaseValue = ownerMaxHp > 0
-            ? Math.Max(1, (int)Math.Ceiling(ownerMaxHp * 10 / 100m))
+            ? Math.Max(1, (int)Math.Ceiling(ownerMaxHp * SmilingBodiesPageRelic.AbsorptionHealPercentPerStrong / 100m))
             : 0;
         DynamicVars["MaxHpLoss"].BaseValue = ownerMaxHp > 0
             ? Math.Max(1, (int)Math.Ceiling(ownerMaxHp * SmilingBodiesPageRelic.CorpseMountainMaxHpLossPercent / 100m))

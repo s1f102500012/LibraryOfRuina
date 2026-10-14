@@ -33,6 +33,11 @@ internal sealed class LibraryOfRuinaSettings : ExtAutoModSettings
     private static bool _runtimeSideEffectsEnabled;
     private static bool _monsterExtensionEnabled = true;
     private static double _resistanceMode = 3d;
+    private static bool _vanillaCharacterProtectionEnabled = true;
+    private static bool _experimentalContentEnabled;
+    private static bool _secondAscensionEnabled;
+    private static bool _animationEffectsEnabled = true;
+    private static int _preferredSecondAscensionLevel;
 
     [SettingsSection("UpdateLog")]
     [SettingsButton("ViewUpdateLog")]
@@ -126,8 +131,8 @@ internal sealed class LibraryOfRuinaSettings : ExtAutoModSettings
     // 局内以本局是否有图书馆内容为准（联机时是房主开局时的设置），局外读本地设置。BGM 控制器用它决定是否接管音乐。
     internal static bool RuntimeSideEffectsEnabled => _runtimeSideEffectsEnabled && LibraryRunSettings.MonsterExtensionEnabled;
 
-    // 这两项玩法设置在局内不能改（暂停菜单里能打开设置界面）：局内的值已由本局的 LibraryRunSettingsModifier 固定，
-    // 本地设置只影响之后新开的局，局内改了也不会生效。所以这两行在局内不显示，setter 也拒绝“恢复默认”之类的写入，
+    // 玩法与战斗动画设置在局内不能改（暂停菜单里能打开设置界面）：局内的值已由本局的 LibraryRunSettingsModifier 固定，
+    // 本地设置只影响之后新开的局。局内以只读摘要显示房主值，setter 拒绝“恢复默认”之类的写入，
     // 免得玩家以为改动作用于当前这局。
     private static bool RejectDuringRun(string setting)
     {
@@ -145,7 +150,7 @@ internal sealed class LibraryOfRuinaSettings : ExtAutoModSettings
         _runtimeSideEffectsEnabled = true;
     }
 
-    /// <summary>本次启动是否注入了内容（初始化越过了“关闭内容 / 不兼容模组”分支）；进程内不再改变。</summary>
+    /// <summary>本次启动是否成功注册内容能力；本地内容开关不影响注册。</summary>
     internal static bool ContentInjected => _runtimeSideEffectsEnabled;
 
     [SettingsSection("MonsterExtension")]
@@ -181,7 +186,18 @@ internal sealed class LibraryOfRuinaSettings : ExtAutoModSettings
     }
 
     [SettingsSection("MonsterExtension")]
-    public static bool VanillaCharacterProtectionEnabled { get; set; } = true;
+    [SettingsLockedDuringRun]
+    public static bool VanillaCharacterProtectionEnabled
+    {
+        get => _vanillaCharacterProtectionEnabled;
+        set
+        {
+            if (!RejectDuringRun(nameof(VanillaCharacterProtectionEnabled)))
+            {
+                _vanillaCharacterProtectionEnabled = value;
+            }
+        }
+    }
 
     [SettingsSection("Audio")]
     public static bool AudioSettingsExpanded { get; set; } = false;
@@ -306,11 +322,33 @@ internal sealed class LibraryOfRuinaSettings : ExtAutoModSettings
         LibraryOfRuinaFtueIds.CurrentUpdateLogTutorialFingerprint;
 
     [SettingsSection("ExperimentalContent")]
-    public static bool ExperimentalContentEnabled { get; set; } = false;
+    [SettingsLockedDuringRun]
+    public static bool ExperimentalContentEnabled
+    {
+        get => _experimentalContentEnabled;
+        set
+        {
+            if (!RejectDuringRun(nameof(ExperimentalContentEnabled)))
+            {
+                _experimentalContentEnabled = value;
+            }
+        }
+    }
 
     [SettingsSection("ExperimentalContent")]
     [SettingsVisibleWhen(nameof(ExperimentalContentEnabled), true)]
-    public static bool SecondAscensionEnabled { get; set; } = false;
+    [SettingsLockedDuringRun]
+    public static bool SecondAscensionEnabled
+    {
+        get => _secondAscensionEnabled;
+        set
+        {
+            if (!RejectDuringRun(nameof(SecondAscensionEnabled)))
+            {
+                _secondAscensionEnabled = value;
+            }
+        }
+    }
 
     [SettingsHideInUI]
     [SettingsSection("IntentGraph")]
@@ -329,10 +367,20 @@ internal sealed class LibraryOfRuinaSettings : ExtAutoModSettings
         set => IntentDisplayStyleState.Set(value);
     }
 
-    // 只影响本机怪物外观（framework/visuals/AnimationEffects.cs）：开=原版分层生成的 Spine 骨骼动画，关=逐帧换图。
-    // 不参与联机比对；外观在怪物出场时按当时的开关建立，局内切换对之后出场的怪物生效。
+    // 战斗动画随房主本局设置固定；开=Spine 骨骼动画，关=逐帧换图。
     [SettingsSection("CombatUi")]
-    public static bool AnimationEffectsEnabled { get; set; } = true;
+    [SettingsLockedDuringRun]
+    public static bool AnimationEffectsEnabled
+    {
+        get => _animationEffectsEnabled;
+        set
+        {
+            if (!RejectDuringRun(nameof(AnimationEffectsEnabled)))
+            {
+                _animationEffectsEnabled = value;
+            }
+        }
+    }
 
     // 只影响本机生命条旁的受伤预览（ui/DamagePreview/DamagePreviewOverlay.cs）：关闭后不显示也不再模拟敌方回合，
     // 省下联机后期随卡组与人数增长的重算开销。不参与联机比对，局内切换立即生效。
@@ -348,10 +396,50 @@ internal sealed class LibraryOfRuinaSettings : ExtAutoModSettings
 
     [SettingsHideInUI]
     [SliderRange(0, 10)]
-    public static int PreferredSecondAscensionLevel { get; set; } = 0;
+    [SettingsLockedDuringRun]
+    public static int PreferredSecondAscensionLevel
+    {
+        get => _preferredSecondAscensionLevel;
+        set
+        {
+            if (!RejectDuringRun(nameof(PreferredSecondAscensionLevel)))
+            {
+                _preferredSecondAscensionLevel = Math.Clamp(value, 0, 10);
+            }
+        }
+    }
 
     [SettingsHideInUI]
     public static bool DebugMode { get; set; }
+
+    public override void SetupConfigUI(Control optionContainer)
+    {
+        var carrier = LibraryRunSettings.Find(infra.lifecycle.CurrentRun.State);
+        var notice = CreateRawLabelControl(GetLabelText(carrier == null ? "HostSettingsNotice" : "RunSettingsNotice"), 24);
+        notice.CustomMinimumSize = new Vector2(0, 112);
+        notice.FitContent = true;
+        optionContainer.AddChild(notice);
+        if (carrier != null)
+        {
+            string Toggle(bool enabled) => GetLabelText(enabled ? "SettingEnabled" : "SettingDisabled");
+            string[] lines =
+            [
+                GetLabelText(nameof(MonsterExtensionEnabled)) + ": " + Toggle(carrier.MonsterExtensionEnabled),
+                GetLabelText(nameof(ResistanceMode)) + ": " + carrier.LibraryOfRuina_RunResistanceMode,
+                GetLabelText(nameof(VanillaCharacterProtectionEnabled)) + ": " + Toggle(carrier.LibraryOfRuina_RunVanillaCharacterProtectionEnabled),
+                GetLabelText(nameof(ExperimentalContentEnabled)) + ": " + Toggle(carrier.LibraryOfRuina_RunExperimentalContentEnabled),
+                GetLabelText(nameof(SecondAscensionEnabled)) + ": " + Toggle(carrier.LibraryOfRuina_RunSecondAscensionEnabled),
+                GetLabelText("SecondAscensionLevel") + ": " + features.secondascension.LibrarySecondAscensionState.GetCurrentRunLevel(),
+                GetLabelText(nameof(AnimationEffectsEnabled)) + ": " + Toggle(carrier.LibraryOfRuina_RunAnimationEffectsEnabled)
+            ];
+            var summary = CreateRawLabelControl(string.Join("\n", lines), 24);
+            summary.CustomMinimumSize = new Vector2(0, 300);
+            summary.FitContent = true;
+            optionContainer.AddChild(summary);
+        }
+
+        base.SetupConfigUI(optionContainer);
+    }
 
     public LibraryOfRuinaSettings()
     {

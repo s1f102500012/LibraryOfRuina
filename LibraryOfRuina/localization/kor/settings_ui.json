@@ -43,5 +43,10 @@
   "LIBRARYOFRUINA-INJECTION_MISMATCH.host_injected": "호스트는 폐허 도서관 콘텐츠를 사용 중이지만, 이번 실행에서 이 컴퓨터에는 폐허 도서관 콘텐츠가 로드되지 않았습니다(‘폐허 도서관 콘텐츠 활성화’가 꺼져 있거나 호환되지 않는 모드가 감지됨). 계속하면 동기화가 어긋납니다. 설정을 켜고 게임을 다시 시작한 뒤 다시 참가해 주세요.",
   "LIBRARYOFRUINA-INJECTION_MISMATCH.host_not_injected": "호스트는 이번 실행에서 폐허 도서관 콘텐츠를 로드하지 않았지만(‘폐허 도서관 콘텐츠 활성화’가 꺼져 있거나 호환되지 않는 모드가 감지됨), 이 컴퓨터에는 로드되어 있습니다. 계속하면 동기화가 어긋납니다. 양쪽을 맞춰야 합니다: 이 컴퓨터에서 설정을 끄고 게임을 다시 시작하거나, 호스트가 설정을 켜고 게임을 다시 시작해야 합니다.",
   "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.title": "의도 그래프 안내",
-  "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.body": "Chaofan의 창작마당 모드 Intent Graph(3747528152)가 감지되었습니다.\n이 모드의 의도 그래프는 도서관 몬스터 고유의 의도를 표시하기 위해 Intent Graph를 각색한 것입니다. 도서관 몬스터에 마우스를 올리면 Intent Graph 패널에 이 모드의 그래프가 표시되며, 패널의 위치·고정·배율은 Intent Graph 설정을 따릅니다. 다른 몬스터에는 영향이 없습니다.\n원작자가 요청하면 이 기능은 삭제됩니다."
+  "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.body": "Chaofan의 창작마당 모드 Intent Graph(3747528152)가 감지되었습니다.\n이 모드의 의도 그래프는 도서관 몬스터 고유의 의도를 표시하기 위해 Intent Graph를 각색한 것입니다. 도서관 몬스터에 마우스를 올리면 Intent Graph 패널에 이 모드의 그래프가 표시되며, 패널의 위치·고정·배율은 Intent Graph 설정을 따릅니다. 다른 몬스터에는 영향이 없습니다.\n원작자가 요청하면 이 기능은 삭제됩니다.",
+  "LIBRARYOFRUINA-HOST_SETTINGS_NOTICE.title": "게임플레이와 전투 애니메이션 설정은 시작 시 호스트가 공유하며 해당 런에서 고정됩니다. 음량, 언어, 튜토리얼 및 UI는 개인 설정을 유지합니다.",
+  "LIBRARYOFRUINA-SECOND_ASCENSION_LEVEL.title": "두 번째 승천 레벨",
+  "LIBRARYOFRUINA-RUN_SETTINGS_NOTICE.title": "이번 런의 게임플레이 및 전투 애니메이션 설정 (멀티에서는 호스트 설정, 읽기 전용. 개인 설정 유지):",
+  "LIBRARYOFRUINA-SETTING_DISABLED.title": "끄기",
+  "LIBRARYOFRUINA-SETTING_ENABLED.title": "켜기"
 }

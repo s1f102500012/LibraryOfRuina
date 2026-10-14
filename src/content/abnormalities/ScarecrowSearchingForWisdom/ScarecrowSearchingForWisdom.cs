@@ -46,6 +46,9 @@ public sealed class ScarecrowSearchingForWisdom : LorMonsterModel
     private const int StruggleMinDamage = 9;
     private const int StruggleMaxDamage = 12;
     private const int StruggleHits = 2;
+    private const int RakeWisdomCards = 1; // 求知的钉耙：命中后放到目标抽牌堆顶的智慧张数，各进阶相同。
+    private const int StruggleWisdomCards = 1; // 求知的挣扎：命中后加入每名被命中玩家弃牌堆的智慧张数，各进阶相同。
+    private const int OpeningWisdomCards = 1; // 战斗开始：由编队第三只稻草人放到每名存活玩家抽牌堆顶的智慧张数，各进阶相同。
     // 收割智慧：最低单次伤害。
     private const int HarvestMinDamage = 6;
 
@@ -177,13 +180,13 @@ public sealed class ScarecrowSearchingForWisdom : LorMonsterModel
             RakeOfWisdomMoveId,
             RakeOfWisdomMove,
             new SingleAttackIntent(() => GetRakeDamageRoll()),
-            new StatusIntent(1));
+            new StatusIntent(RakeWisdomCards));
 
         _struggleState = new MoveState(
             StruggleForWisdomMoveId,
             StruggleForWisdomMove,
             new DynamicAttackIntent(() => GetStruggleDamageRoll(), () => StruggleHits),
-            new StatusIntent(1));
+            new StatusIntent(StruggleWisdomCards));
 
         _harvestState = new MoveState(
             HarvestWisdomMoveId,
@@ -325,7 +328,7 @@ public sealed class ScarecrowSearchingForWisdom : LorMonsterModel
             await CardPileCmdCompat.AddToCombatAndPreview<ScarecrowWisdomStatusCard>(
                 target,
                 PileType.Draw,
-                1,
+                RakeWisdomCards,
                 addedByPlayer: false,
                 CardPilePosition.Top);
         }
@@ -350,7 +353,7 @@ public sealed class ScarecrowSearchingForWisdom : LorMonsterModel
             await CardPileCmdCompat.AddToCombatAndPreview<ScarecrowWisdomStatusCard>(
                 target,
                 PileType.Discard,
-                1,
+                StruggleWisdomCards,
                 addedByPlayer: false);
         }
 
@@ -481,7 +484,7 @@ public sealed class ScarecrowSearchingForWisdom : LorMonsterModel
             await CardPileCmdCompat.AddToCombatWithoutPreview<ScarecrowWisdomStatusCard>(
                 player,
                 PileType.Draw,
-                1,
+                OpeningWisdomCards,
                 addedByPlayer: false,
                 CardPilePosition.Top);
         }
@@ -538,9 +541,9 @@ public sealed class ScarecrowSearchingForWisdom : LorMonsterModel
         yield return new DebuffIntent(strong: true);
         yield return new DefendIntent();
         yield return new SingleAttackIntent(RakeMaxDamage);
-        yield return new StatusIntent(1);
+        yield return new StatusIntent(RakeWisdomCards);
         yield return new MultiAttackIntent(StruggleMaxDamage, StruggleHits);
-        yield return new StatusIntent(2);
+        yield return new StatusIntent(StruggleWisdomCards);
         yield return new MultiAttackIntent(HarvestMaxDamage, HarvestHits);
         yield return new CardDebuffIntent();
     }

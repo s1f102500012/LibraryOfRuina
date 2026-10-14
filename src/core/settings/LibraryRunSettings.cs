@@ -24,7 +24,7 @@ namespace LibraryOfRuina.core.settings;
 /// 此刻的本地设置补建。联机读档时房主先用 <c>CanonicalizeSave</c> 规范化存档（其中调用 FromSerializable），
 /// 补建的载体因此写进发给客户端的存档，客户端读到的是房主的值；之后的存档里都有它，只补建这一次。</item>
 /// </list>
-/// 进程启动时没有注入内容（设置关闭或检测到不兼容模组）的一端不装玩法补丁；联机时两端注入状态不一致由
+/// 所有进程始终注册内容能力，是否启用由本局载体决定；初始化失败时的能力不一致由
 /// <see cref="LibraryRunInjectionGuard"/> 诊断并退出开局或读档。
 /// </summary>
 internal static class LibraryRunSettings
@@ -40,6 +40,22 @@ internal static class LibraryRunSettings
     /// <summary>当前局是否启用废墟图书馆内容；没有局时为本地设置。</summary>
     internal static bool MonsterExtensionEnabled =>
         IsMonsterExtensionEnabled(CurrentRun.State);
+
+    internal static bool IsVanillaCharacterProtectionEnabled(IRunState runState) =>
+        Find(runState)?.LibraryOfRuina_RunVanillaCharacterProtectionEnabled
+        ?? LibraryOfRuinaSettings.VanillaCharacterProtectionEnabled;
+
+    internal static bool ExperimentalContentEnabled =>
+        Find(CurrentRun.State)?.LibraryOfRuina_RunExperimentalContentEnabled
+        ?? LibraryOfRuinaSettings.ExperimentalContentEnabled;
+
+    internal static bool SecondAscensionEnabled =>
+        Find(CurrentRun.State)?.LibraryOfRuina_RunSecondAscensionEnabled
+        ?? LibraryOfRuinaSettings.SecondAscensionEnabled;
+
+    internal static bool AnimationEffectsEnabled =>
+        Find(CurrentRun.State)?.LibraryOfRuina_RunAnimationEffectsEnabled
+        ?? LibraryOfRuinaSettings.AnimationEffectsEnabled;
 
     internal static bool IsMonsterExtensionEnabled(IRunState? runState) =>
         Find(runState)?.MonsterExtensionEnabled ?? LibraryOfRuinaSettings.MonsterExtensionEnabled;
@@ -102,6 +118,16 @@ internal static class LibraryRunSettings
         {
             Attach(runState, LibraryRunSettingsModifier.CreateFromLocalSettings(), "loaded run without carrier, backfilled from local settings");
         }
+        else if (Find(runState) is { LibraryOfRuina_RunSettingsVersion: 0 } legacy)
+        {
+            legacy.CaptureAdditionalLocalSettings();
+            // 第二进阶等级已经独立存档；旧局保留实际等级，不受当前房主偏好覆盖。
+            if (features.secondascension.LibrarySecondAscensionState.GetRunLevel(runState) > 0)
+            {
+                legacy.LibraryOfRuina_RunExperimentalContentEnabled = true;
+                legacy.LibraryOfRuina_RunSecondAscensionEnabled = true;
+            }
+        }
     }
 
     internal static void ApplyToRun(LibraryRunSettingsModifier carrier)
@@ -145,6 +171,10 @@ internal static class LibraryRunSettings
                  + carrier.MonsterExtensionEnabled
                  + ", resistance="
                  + carrier.LibraryOfRuina_RunResistanceMode
+                 + ", vanillaProtection=" + carrier.LibraryOfRuina_RunVanillaCharacterProtectionEnabled
+                 + ", experimental=" + carrier.LibraryOfRuina_RunExperimentalContentEnabled
+                 + ", secondAscension=" + carrier.LibraryOfRuina_RunSecondAscensionEnabled
+                 + ", animations=" + carrier.LibraryOfRuina_RunAnimationEffectsEnabled
                  + ".");
     }
 }

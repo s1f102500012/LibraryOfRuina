@@ -35,6 +35,9 @@ public sealed class FuneralOfTheDeadButterflies : LorMonsterModel
     private const string Move2Id = "BUTTERFLY_CROSSING";
     private const string Move3Id = "SALVATION_HAND";
     private const string Move4Id = "FUNERAL_SHOT";
+    private const int ButterflyCrossingHits = 3; // 蝶群穿行：攻击次数（单次伤害见 Move2Damage），各进阶相同。
+    private const int SalvationHandWeak = 2; // 救赎之手：给予目标的虚弱层数，各进阶相同。
+    private const int SalvationHandStrength = 1; // 救赎之手：所有存活敌人获得的力量，各进阶相同。
 
     public const string IdleTexturePath = FuneralOfTheDeadButterfliesAssets.FuneralOfTheDeadButterfliesIdleTexture;
     public const string CoffinPrepareTexturePath = FuneralOfTheDeadButterfliesAssets.CoffinPrepareTexture;
@@ -200,14 +203,14 @@ public sealed class FuneralOfTheDeadButterflies : LorMonsterModel
         var move2 = new MoveState(
             Move2Id,
             Move2,
-            new MultiAttackIntent(Move2Damage, 3),
+            new MultiAttackIntent(Move2Damage, ButterflyCrossingHits),
             new SummonIntent());
 
         var move3 = new MoveState(
             Move3Id,
             Move3,
             new DebuffIntent(),
-            new DetailedBuffIntent<StrengthPower>(1, DetailedBuffTargetScope.AllEnemies),
+            new DetailedBuffIntent<StrengthPower>(SalvationHandStrength, DetailedBuffTargetScope.AllEnemies),
             new SummonIntent());
 
         var move4 = new MoveState(
@@ -253,7 +256,7 @@ public sealed class FuneralOfTheDeadButterflies : LorMonsterModel
 
     private async Task Move2(IReadOnlyList<Creature> targets)
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < ButterflyCrossingHits; i++)
         {
             if (Creature.IsDead) return;
             LocalOggOneShotPlayer.Play(AttackBlackSfxPath, -1.5f);
@@ -274,7 +277,7 @@ public sealed class FuneralOfTheDeadButterflies : LorMonsterModel
 
         if (targets.Count > 0)
         {
-            await PowerCmdCompat.Apply<WeakPower>(targets, 2m, Creature, null);
+            await PowerCmdCompat.Apply<WeakPower>(targets, SalvationHandWeak, Creature, null);
         }
 
         if (Creature.CombatState == null)
@@ -285,7 +288,7 @@ public sealed class FuneralOfTheDeadButterflies : LorMonsterModel
         IReadOnlyList<Creature> enemies = Creature.CombatState.LivingEnemies().ToArray();
         if (enemies.Count > 0)
         {
-            await PowerCmdCompat.Apply<StrengthPower>(enemies, 1m, Creature, null);
+            await PowerCmdCompat.Apply<StrengthPower>(enemies, SalvationHandStrength, Creature, null);
         }
 
         await SummonButterfly(DeadButterflyInitialMove.PainfulRelease);

@@ -42,8 +42,9 @@ public sealed class ArtFloorGalaxyFriend : LorMonsterModel
     public const int FakeDeathHp = 0;
     public const int FakeDeathStunTurns = 2;
     private const int MinimumRecoveryHp = 1;
-    private const int StarlightHits = 5;
-    private const int TwinkleBlock = 9;
+    private const int WaitIntangible = 2; // 等候：自身获得的无实体层数（施加后跳过下一次衰减），各进阶相同。
+    private const int StarlightHits = 5; // 星辉洒落：攻击次数（单次伤害见 StarlightDamage），各进阶相同。
+    private const int TwinkleBlock = 9; // 闪烁：攻击后自身获得的格挡，各进阶相同。
     private const decimal RecoveryHpRatio = 0.80m;
     private const float SegmentDelaySeconds = 0.48f;
 
@@ -285,7 +286,7 @@ public sealed class ArtFloorGalaxyFriend : LorMonsterModel
         _waitState = new MoveState(
             WaitMoveId,
             WaitMove,
-            new DetailedBuffIntent<IntangiblePower>(1));
+            new DetailedBuffIntent<IntangiblePower>(WaitIntangible));
 
         _starlightState = new MoveState(
             StarlightFallMoveId,
@@ -326,7 +327,7 @@ public sealed class ArtFloorGalaxyFriend : LorMonsterModel
     {
         LocalOggOneShotPlayer.Play(GalaxyFriend.ParrySfxPath, -2f);
         await CreatureCmd.TriggerAnim(Creature, "Parry", SegmentDelaySeconds);
-        IntangiblePower? intangible = await PowerCmdCompat.Apply<IntangiblePower>(Creature, 2m, Creature, null);
+        IntangiblePower? intangible = await PowerCmdCompat.Apply<IntangiblePower>(Creature, WaitIntangible, Creature, null);
         if (intangible != null)
         {
             intangible.SkipNextDurationTick = true;

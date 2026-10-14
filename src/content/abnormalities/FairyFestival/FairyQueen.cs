@@ -28,13 +28,14 @@ public sealed class FairyQueen : CounterIntentMonsterModel
     private const string StarvedFlutteringMoveId = "STARVED_FLUTTERING";
 
     private const float SegmentDelaySeconds = 1.35f;
-    private const int QueensDecreeBlock = 7;
-    private const int PredationHeal = 4;
-    private const int PredationBlock = 9;
+    private const int QueensDecreeBlock = 7; // 女王的诏令：自身获得的格挡，各进阶相同。
+    private const int QueensDecreeReservedFood = 1; // 女王的诏令：给予随机一只存活精灵畸块的储备粮层数，各进阶相同。
+    private const int PredationHeal = 4; // 猎食：自身回复生命的基础值（多人时按人数缩放），各进阶相同。
+    private const int PredationBlock = 9; // 猎食：自身获得的格挡，各进阶相同。
     private const int StarvedFlutteringHits = 3; // 饥饿振翅：攻击次数，每次攻击分别判定流血。
     private const int StarvedFlutteringBaseDamage = 2; // 饥饿振翅：低于 DeadlyEnemies 进阶时的单次伤害。
     private const int StarvedFlutteringHighAscensionDamage = 3; // 饥饿振翅：达到 DeadlyEnemies 进阶时的单次伤害。
-    private const int StarvedFlutteringBleed = 1;
+    private const int StarvedFlutteringBleed = 1; // 饥饿振翅：每段造成未被格挡伤害时给予目标的流血层数，各进阶相同。
     // 饥饿狂乱吞噬全部畸块时，女王剩余生命占最大生命的百分比阈值。
     public const int StarvedFrenzyHpThresholdPercent = 40;
 
@@ -238,7 +239,7 @@ public sealed class FairyQueen : CounterIntentMonsterModel
             QueensDecreeMove,
             new DefendIntent(),
             new DetailedBuffIntent<FairyFestivalReservedFoodPower>(
-                1,
+                QueensDecreeReservedFood,
                 DetailedBuffTargetScope.RandomEnemy));
 
         var predation = new MoveState(
@@ -285,7 +286,7 @@ public sealed class FairyQueen : CounterIntentMonsterModel
         Creature? food = RunRng.MonsterAi.NextItem(FairyFestivalCombatHelper.GetLivingFairyMasses(Creature).ToList());
         if (food != null)
         {
-            await PowerCmdCompat.Apply<FairyFestivalReservedFoodPower>(food, 1m, Creature, null);
+            await PowerCmdCompat.Apply<FairyFestivalReservedFoodPower>(food, QueensDecreeReservedFood, Creature, null);
         }
     }
 
@@ -401,7 +402,7 @@ public sealed class FairyQueen : CounterIntentMonsterModel
     {
         yield return new DefendIntent();
         yield return new DetailedBuffIntent<FairyFestivalReservedFoodPower>(
-            1,
+            QueensDecreeReservedFood,
             DetailedBuffTargetScope.RandomEnemy);
         yield return new SingleAttackIntent(PredationDamage);
         yield return new HealIntent();

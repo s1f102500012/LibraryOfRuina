@@ -65,21 +65,7 @@ public static class LibraryOfRuinaInitializer
             report.RethrowRequiredFailure();
         }
 
-        if (!LibraryOfRuinaSettings.MonsterExtensionEnabled)
-        {
-            // 联机时与注入内容的一端混用会分叉；未注入也要装上诊断补丁，发现不一致就退出开局或读档。
-            report.RunAll(
-            [
-                new("SettingsUiPatches", true, () => PatchSettingsUi(harmony)),
-                new("InjectionMismatchGuard", true, () => LibraryRunInjectionGuard.PatchForNonInjectedProcess(harmony)),
-            ]);
-            report.LogSummary(
-                "library injection disabled; settings UI and the multiplayer injection-mismatch guard remain. "
-                + "Skipped content pools, runtime controllers, BGM, encounters, and gameplay Harmony patches");
-            report.RethrowRequiredFailure();
-            return;
-        }
-
+        // 始终注册内容能力，客机才能在本地关闭内容时自动采用房主的本局设置。
         LibraryOfRuinaSettings.EnableRuntimeSideEffects();
 
         LibraryPatcher.Result? patchResult = null;

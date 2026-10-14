@@ -86,6 +86,7 @@ public sealed class SoulSnareStatusCard() : CardModel(3, CardType.Status, CardRa
 public sealed class BirdLullabyCard() : CardModel(2, CardType.Skill, CardRarity.Status, TargetType.AnyEnemy)
 {
     public const int Damage = 1;
+    public const int CostIncrease = 1; // 鸟之摇篮曲：每次打出后本场战斗费用的增加量。
 
     public override int MaxUpgradeLevel => 0;
 
@@ -104,7 +105,7 @@ public sealed class BirdLullabyCard() : CardModel(2, CardType.Skill, CardRarity.
     protected override IEnumerable<DynamicVar> CanonicalVars =>
     [
         new DynamicVar("Damage", Damage),
-        new EnergyVar("CostIncrease", 1)
+        new EnergyVar("CostIncrease", CostIncrease)
     ];
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
@@ -146,7 +147,7 @@ public sealed class BirdLullabyCard() : CardModel(2, CardType.Skill, CardRarity.
             // }
         }
 
-        EnergyCost.AddThisCombat(1);
+        EnergyCost.AddThisCombat(CostIncrease);
         InvokeEnergyCostChanged();
     }
 
