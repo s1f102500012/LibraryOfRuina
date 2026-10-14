@@ -43,6 +43,38 @@ public sealed class Nosferatu : LorMonsterModel
     private const string UnbearableThirstMoveId = "UNBEARABLE_THIRST";
     private const string ExtremeBloodthirstMoveId = "EXTREME_BLOODTHIRST";
 
+    private const int GracefulRestBlock = 12; // 高雅的休憩：所有存活敌人获得的格挡，各进阶相同。
+    private const int ElegantDinnerHits = 2; // 精致的晚宴：攻击次数（单次伤害见 ElegantDinnerDamage），各进阶相同。
+    private const int ElegantDinnerBloodPerUnblockedHit = 2; // 精致的晚宴：每段造成未被格挡伤害时自身获得的鲜血层数，各进阶相同。
+    private const int ThirstHits = 1; // 干渴：攻击次数（单次伤害见 ThirstDamage），各进阶相同。
+    private const int ThirstBlood = 3; // 干渴：造成未被格挡伤害时自身获得的鲜血层数，各进阶相同。
+    private const int CrimsonMealBlock = 24; // 猩红的餐食：所有存活敌人获得的格挡，各进阶相同。
+    private const int CrimsonMealQuickness = 5; // 猩红的餐食：所有存活敌人获得的下回合迅捷层数，各进阶相同。
+    private const int CrimsonMealProtection = 5; // 猩红的餐食：所有存活敌人获得的守护层数，各进阶相同。
+    private const int CrimsonMealProtectionTurns = 1; // 猩红的餐食：守护的持续回合数，各进阶相同。
+    private const int BloodFeastHits = 3; // 血宴：无差别攻击次数（单次伤害见 BloodFeastDamage），各进阶相同。
+    private const int BloodFeastHydrophobia = 2; // 血宴：给予每名被攻击玩家的恐水症层数，各进阶相同。
+    private const int BloodFeastHealBase = 12; // 血宴：所有存活敌人回复生命的基础值，另加受到未被格挡伤害的玩家数，各进阶相同。
+    private const int OminousAuraBlock = 18; // 阴森的气息：自身获得的格挡，各进阶相同。
+    private const int OminousAuraWeak = 2; // 阴森的气息：给予所有存活玩家的虚弱层数，各进阶相同。
+    private const int OminousAuraFrail = 2; // 阴森的气息：给予所有存活玩家的脆弱层数，各进阶相同。
+    private const int ColdClawsHits = 12; // 冷酷的魔爪：攻击次数（单次伤害见 ColdClawsDamage），各进阶相同。
+    private const int ColdClawsStrength = 1; // 冷酷的魔爪：攻击后自身获得的力量，各进阶相同。
+    private const int ViolentGestureHits = 4; // 激烈的手势：攻击次数（单次伤害见 ViolentGestureDamage），各进阶相同。
+    private const int ViolentGestureStrengthLoss = 1; // 激烈的手势：受到未被格挡伤害的玩家失去的力量，各进阶相同。
+    private const int ViolentGestureDexterityLoss = 1; // 激烈的手势：受到未被格挡伤害的玩家失去的敏捷，各进阶相同。
+    private const int ViolentGestureRapidWear = 8; // 激烈的手势：给予受到未被格挡伤害的玩家的易损层数，各进阶相同。
+    private const int ViolentGestureRapidWearTurns = 1; // 激烈的手势：易损的持续回合数，各进阶相同。
+    private const int UnbearableThirstBlood = 3; // 无法忍受的饥渴：自身获得的鲜血层数，各进阶相同。
+    private const int UnbearableThirstHeal = 16; // 无法忍受的饥渴：自身回复生命的基础值（多人时按人数缩放），各进阶相同。
+    private const int UnbearableThirstVulnerable = 1; // 无法忍受的饥渴：给予所有存活玩家的易伤层数，各进阶相同。
+    private const int ExtremeBloodthirstHits = 1; // 极度渴血：无差别攻击次数（单次伤害见 ExtremeBloodthirstDamage），各进阶相同。
+    private const int ExtremeBloodthirstHydrophobia = 2; // 极度渴血：给予受到未被格挡伤害的玩家的恐水症层数，各进阶相同。
+    private const int ExtremeBloodthirstRapidWear = 2; // 极度渴血：给予受到未被格挡伤害的玩家的易损层数，各进阶相同。
+    private const int ExtremeBloodthirstRapidWearTurns = 2; // 极度渴血：易损的持续回合数，各进阶相同。
+    private const int ExtremeBloodthirstWeak = 2; // 极度渴血：给予受到未被格挡伤害的玩家的虚弱层数，各进阶相同。
+    private const int ExtremeBloodthirstWeakTurns = 2; // 极度渴血：虚弱的持续回合数，各进阶相同。
+
     internal const string TextureRoot = NosferatuAssets.NosferatuMonsterRoot;
     private const float LocalSfxVolumeScale = 0.85f;
     private static readonly float LocalSfxVolumeDb = Mathf.LinearToDb(LocalSfxVolumeScale);
@@ -158,67 +190,71 @@ public sealed class Nosferatu : LorMonsterModel
             ElegantDinnerMove,
             new CombinedAttackBuffIntent(
                 () => ElegantDinnerDamage,
-                () => 2,
+                () => ElegantDinnerHits,
                 "NOSFERATU_ELEGANT_DINNER.description",
-                IntentBadge.FromPower<NosferatuBloodPower>(2)));
+                IntentBadge.FromPower<NosferatuBloodPower>(ElegantDinnerBloodPerUnblockedHit)));
         var thirst = new MoveState(
             ThirstMoveId,
             ThirstMove,
             new CombinedAttackBuffIntent(
                 () => ThirstDamage,
-                () => 1,
+                () => ThirstHits,
                 "NOSFERATU_THIRST.description",
-                IntentBadge.FromPower<NosferatuBloodPower>(3)));
+                IntentBadge.FromPower<NosferatuBloodPower>(ThirstBlood)));
         var crimsonMeal = new MoveState(
             CrimsonMealMoveId,
             CrimsonMealMove,
             new CombinedDefendBuffIntent(
-                24,
+                CrimsonMealBlock,
                 "NOSFERATU_CRIMSON_MEAL.description",
-                IntentBadge.FromPower<QueenBeeNextTurnQuicknessPower>(5),
-                IntentBadge.FromPower<LibraryProtectionPower>(5)));
+                IntentBadge.FromPower<QueenBeeNextTurnQuicknessPower>(CrimsonMealQuickness),
+                IntentBadge.FromPower<LibraryProtectionPower>(CrimsonMealProtection)));
         var bloodFeast = new MoveState(
             BloodFeastMoveId,
             BloodFeastMove,
             new IndiscriminateAttackIntent(
                 () => BloodFeastDamage,
-                () => 3,
+                () => BloodFeastHits,
                 "NOSFERATU_BLOOD_FEAST.description",
-                IntentBadge.FromPower<NosferatuHydrophobiaPower>(2),
+                IntentBadge.FromPower<NosferatuHydrophobiaPower>(BloodFeastHydrophobia),
                 IntentBadge.Heal(() => BloodFeastHealPreview)));
 
         var ominousAura = new MoveState(
             OminousAuraMoveId,
             OminousAuraMove,
-            new CombinedDefendDebuffIntent(18, "NOSFERATU_OMINOUS_AURA.description", IntentBadge.Weak(2), IntentBadge.Frail(2)));
+            new CombinedDefendDebuffIntent(
+                OminousAuraBlock,
+                "NOSFERATU_OMINOUS_AURA.description",
+                IntentBadge.Weak(OminousAuraWeak),
+                IntentBadge.Frail(OminousAuraFrail)));
         var coldClaws = new MoveState(
             ColdClawsMoveId,
             ColdClawsMove,
             new CombinedAttackBuffIntent(
                 () => ColdClawsDamage,
-                () => 12,
+                () => ColdClawsHits,
                 "NOSFERATU_COLD_CLAWS.description",
-                IntentBadge.Strength(1)));
+                IntentBadge.Strength(ColdClawsStrength)));
         var violentGesture = new MoveState(
             ViolentGestureMoveId,
             ViolentGestureMove,
             new CombinedAttackDebuffIntent(
                 () => ViolentGestureDamage,
-                () => 4,
+                () => ViolentGestureHits,
                 "NOSFERATU_VIOLENT_GESTURE.description",
-                IntentBadge.StrengthDown(1),
-                IntentBadge.FromPower<DexterityPower>(-1),
-                IntentBadge.FromPower<StrengthPower>(-1),
-                IntentBadge.RapidWear(8, 1)));
+                IntentBadge.StrengthDown(ViolentGestureStrengthLoss),
+                IntentBadge.FromPower<DexterityPower>(-ViolentGestureDexterityLoss),
+                IntentBadge.FromPower<StrengthPower>(-ViolentGestureStrengthLoss),
+                IntentBadge.RapidWear(ViolentGestureRapidWear, ViolentGestureRapidWearTurns)));
         var unbearableThirst = new MoveState(
             UnbearableThirstMoveId,
             UnbearableThirstMove,
             new BadgedBuffIntent(
                 [
-                    IntentBadge.FromPower<NosferatuBloodPower>(3),
+                    IntentBadge.FromPower<NosferatuBloodPower>(UnbearableThirstBlood),
                     IntentBadge.Heal(),
                 ],
-                amount: 3,
+                amount: UnbearableThirstBlood,
                 "NOSFERATU_UNBEARABLE_THIRST.description"),
             new DebuffIntent());
         var extremeBloodthirst = new MoveState(
@@ -226,11 +262,14 @@ public sealed class Nosferatu : LorMonsterModel
             ExtremeBloodthirstMove,
             new IndiscriminateAttackIntent(
                 () => ExtremeBloodthirstDamage,
-                () => 1,
+                () => ExtremeBloodthirstHits,
                 "NOSFERATU_EXTREME_BLOODTHIRST.description",
-                IntentBadge.FromPower<NosferatuHydrophobiaPower>(2),
-                IntentBadge.RapidWear(2, 2),
-                IntentBadge.FromPower<LibraryWeakPower>(2,  "2",  "2")));
+                IntentBadge.FromPower<NosferatuHydrophobiaPower>(ExtremeBloodthirstHydrophobia),
+                IntentBadge.RapidWear(ExtremeBloodthirstRapidWear, ExtremeBloodthirstRapidWearTurns),
+                IntentBadge.FromPower<LibraryWeakPower>(
+                    ExtremeBloodthirstWeak,
+                    ExtremeBloodthirstWeakTurns.ToString(),
+                    ExtremeBloodthirstWeak.ToString())));
 
         var router = new DelegatingMonsterRouterState(
             "NOSFERATU_ROUTER",
@@ -303,7 +342,8 @@ public sealed class Nosferatu : LorMonsterModel
     private int ExtremeBloodthirstDamage =>
         AscensionHelper.GetValueIfAscension(AscensionLevel.DeadlyEnemies, 23, 18);
 
-    private int BloodFeastHealPreview => 12 + Math.Max(1, Creature.CombatState?.PlayerCreatures.Count(static c => c.IsAlive) ?? 1);
+    private int BloodFeastHealPreview =>
+        BloodFeastHealBase + Math.Max(1, Creature.CombatState?.PlayerCreatures.Count(static c => c.IsAlive) ?? 1);
 
     private async Task GracefulRestMove(IReadOnlyList<Creature> targets)
     {
@@ -316,7 +356,7 @@ public sealed class Nosferatu : LorMonsterModel
 
         foreach (Creature enemy in LivingEnemies())
         {
-            await CreatureCmd.GainBlock(enemy, 12, ValueProp.Move, null);
+            await CreatureCmd.GainBlock(enemy, GracefulRestBlock, ValueProp.Move, null);
         }
 
         AdvanceCycle();
@@ -325,10 +365,10 @@ public sealed class Nosferatu : LorMonsterModel
     private async Task ElegantDinnerMove(IReadOnlyList<Creature> targets)
     {
         LocalOggOneShotPlayer.Play(NosferatuAssets.NosferatuSfxRoot + "nosferatu_transform_strike.ogg", LocalSfxVolumeDb);
-        GroupAttackOutcome attack = await ExecuteStandardAttackDetailed(ElegantDinnerDamage, hits: 2, "Attack");
+        GroupAttackOutcome attack = await ExecuteStandardAttackDetailed(ElegantDinnerDamage, hits: ElegantDinnerHits, "Attack");
         foreach (DamageResult _ in attack.UnblockedResults)
         {
-            await NosferatuBloodPower.Change(Creature, 2, Creature);
+            await NosferatuBloodPower.Change(Creature, ElegantDinnerBloodPerUnblockedHit, Creature);
         }
 
         AdvanceCycle();
@@ -337,10 +377,10 @@ public sealed class Nosferatu : LorMonsterModel
     private async Task ThirstMove(IReadOnlyList<Creature> targets)
     {
         LocalOggOneShotPlayer.Play(NosferatuAssets.NosferatuSfxRoot + "nosferatu_transform_strike.ogg", LocalSfxVolumeDb);
-        GroupAttackOutcome attack = await ExecuteStandardAttackDetailed(ThirstDamage, hits: 1, "Attack");
+        GroupAttackOutcome attack = await ExecuteStandardAttackDetailed(ThirstDamage, hits: ThirstHits, "Attack");
         if (attack.AnyUnblocked)
         {
-            await NosferatuBloodPower.Change(Creature, 3, Creature);
+            await NosferatuBloodPower.Change(Creature, ThirstBlood, Creature);
         }
 
         AdvanceCycle();
@@ -351,18 +391,18 @@ public sealed class Nosferatu : LorMonsterModel
         await AbnormalityAnimHelper.TriggerCast(Creature);
         foreach (Creature enemy in LivingEnemies())
         {
-            await CreatureCmd.GainBlock(enemy, 24, ValueProp.Move, null);
+            await CreatureCmd.GainBlock(enemy, CrimsonMealBlock, ValueProp.Move, null);
             // await LibraryPowerCmd.Apply<LibraryQuicknessPower>(enemy,
             //     5,
             //     Creature,
             //     null);
             await PowerCmdCompat.Apply<QueenBeeNextTurnQuicknessPower>(enemy,
-                5,
+                CrimsonMealQuickness,
                 Creature, null);
             await LibraryPowerCmd.Apply<LibraryProtectionPower>(
                 enemy,
-                5,
-                turns: 1,
+                CrimsonMealProtection,
+                turns: CrimsonMealProtectionTurns,
                 Creature,
                 null);
         }
@@ -373,13 +413,13 @@ public sealed class Nosferatu : LorMonsterModel
     private async Task BloodFeastMove(IReadOnlyList<Creature> targets)
     {
         LocalOggOneShotPlayer.Play(NosferatuAssets.NosferatuSfxRoot + "nosferatu_strong_attack.ogg", LocalSfxVolumeDb);
-        GroupAttackOutcome attack = await ExecuteGroupAttackDetailed(BloodFeastDamage, hits: 3, "SpecialAttack");
+        GroupAttackOutcome attack = await ExecuteGroupAttackDetailed(BloodFeastDamage, hits: BloodFeastHits, "SpecialAttack");
         foreach (Creature target in attack.Targets.Distinct())
         {
-            await PowerCmdCompat.ApplyDebuff<NosferatuHydrophobiaPower>(target, 2, Creature, null);
+            await PowerCmdCompat.ApplyDebuff<NosferatuHydrophobiaPower>(target, BloodFeastHydrophobia, Creature, null);
         }
 
-        int heal = 12 + attack.UnblockedTargets.Distinct().Count();
+        int heal = BloodFeastHealBase + attack.UnblockedTargets.Distinct().Count();
         foreach (Creature enemy in LivingEnemies())
         {
             await CreatureCmd.Heal(enemy, MultiplayerScalingPatchHelper.ScaleMonsterHealAmount(enemy, heal));
@@ -391,11 +431,11 @@ public sealed class Nosferatu : LorMonsterModel
     private async Task OminousAuraMove(IReadOnlyList<Creature> targets)
     {
         await AbnormalityAnimHelper.TriggerCast(Creature);
-        await CreatureCmd.GainBlock(Creature, 18, ValueProp.Move, null);
+        await CreatureCmd.GainBlock(Creature, OminousAuraBlock, ValueProp.Move, null);
         foreach (Creature player in LivingPlayers())
         {
-            await PowerCmdCompat.ApplyDebuff<WeakPower>(player, 2, Creature, null);
-            await PowerCmdCompat.ApplyDebuff<FrailPower>(player, 2, Creature, null);
+            await PowerCmdCompat.ApplyDebuff<WeakPower>(player, OminousAuraWeak, Creature, null);
+            await PowerCmdCompat.ApplyDebuff<FrailPower>(player, OminousAuraFrail, Creature, null);
         }
 
         AdvanceCycle();
@@ -404,23 +444,23 @@ public sealed class Nosferatu : LorMonsterModel
     private async Task ColdClawsMove(IReadOnlyList<Creature> targets)
     {
         LocalOggOneShotPlayer.Play(NosferatuAssets.NosferatuSfxRoot + "nosferatu_transform_strike.ogg", LocalSfxVolumeDb);
-        await ExecuteStandardAttackDetailed(ColdClawsDamage, hits: 12, "Attack");
-        await PowerCmdCompat.Apply<StrengthPower>(Creature, 1, Creature, null);
+        await ExecuteStandardAttackDetailed(ColdClawsDamage, hits: ColdClawsHits, "Attack");
+        await PowerCmdCompat.Apply<StrengthPower>(Creature, ColdClawsStrength, Creature, null);
         AdvanceCycle();
     }
 
     private async Task ViolentGestureMove(IReadOnlyList<Creature> targets)
     {
         LocalOggOneShotPlayer.Play(NosferatuAssets.NosferatuSfxRoot + "nosferatu_transform_slash.ogg", LocalSfxVolumeDb);
-        GroupAttackOutcome attack = await ExecuteStandardAttackDetailed(ViolentGestureDamage, hits: 4, "Attack");
+        GroupAttackOutcome attack = await ExecuteStandardAttackDetailed(ViolentGestureDamage, hits: ViolentGestureHits, "Attack");
         foreach (Creature target in attack.UnblockedTargets.Distinct())
         {
-            await PowerCmdCompat.Apply<StrengthPower>(target, -1, Creature, null);
-            await PowerCmdCompat.Apply<DexterityPower>(target, -1, Creature, null);
+            await PowerCmdCompat.Apply<StrengthPower>(target, -ViolentGestureStrengthLoss, Creature, null);
+            await PowerCmdCompat.Apply<DexterityPower>(target, -ViolentGestureDexterityLoss, Creature, null);
             await LibraryPowerCmd.Apply<LibraryVulnerablePower>(
                 target,
-                8,
-                turns: 1,
+                ViolentGestureRapidWear,
+                turns: ViolentGestureRapidWearTurns,
                 Creature,
                 null);
         }
@@ -432,29 +472,29 @@ public sealed class Nosferatu : LorMonsterModel
     {
         LocalOggOneShotPlayer.Play(NosferatuAssets.NosferatuSfxRoot + "nosferatu_transform_vampire.ogg", LocalSfxVolumeDb);
         await AbnormalityAnimHelper.TriggerCast(Creature);
-        await NosferatuBloodPower.Change(Creature, 3, Creature);
-        await CreatureCmd.Heal(Creature, MultiplayerScalingPatchHelper.ScaleMonsterHealAmount(Creature, 16));
-        await PowerCmdCompat.ApplyDebuff<VulnerablePower>(LivingPlayers(), 1, Creature, null);
+        await NosferatuBloodPower.Change(Creature, UnbearableThirstBlood, Creature);
+        await CreatureCmd.Heal(Creature, MultiplayerScalingPatchHelper.ScaleMonsterHealAmount(Creature, UnbearableThirstHeal));
+        await PowerCmdCompat.ApplyDebuff<VulnerablePower>(LivingPlayers(), UnbearableThirstVulnerable, Creature, null);
         AdvanceCycle();
     }
 
     private async Task ExtremeBloodthirstMove(IReadOnlyList<Creature> targets)
     {
-        GroupAttackOutcome attack = await ExecuteGroupAttackDetailed(ExtremeBloodthirstDamage, hits: 1, "SpecialAttack");
+        GroupAttackOutcome attack = await ExecuteGroupAttackDetailed(ExtremeBloodthirstDamage, hits: ExtremeBloodthirstHits, "SpecialAttack");
         LocalOggOneShotPlayer.Play(NosferatuAssets.NosferatuSfxRoot + "nosferatu_transform_strong_attack_effect.ogg", LocalSfxVolumeDb);
         foreach (Creature target in attack.UnblockedTargets.Distinct())
         {
-            await PowerCmdCompat.ApplyDebuff<NosferatuHydrophobiaPower>(target, 2, Creature, null);
+            await PowerCmdCompat.ApplyDebuff<NosferatuHydrophobiaPower>(target, ExtremeBloodthirstHydrophobia, Creature, null);
             await LibraryPowerCmd.Apply<LibraryVulnerablePower>(
                 target,
-                2,
-                turns: 2,
+                ExtremeBloodthirstRapidWear,
+                turns: ExtremeBloodthirstRapidWearTurns,
                 Creature,
                 null);
             await LibraryPowerCmd.Apply<LibraryWeakPower>(
                 target,
-                2,
-                turns: 2,
+                ExtremeBloodthirstWeak,
+                turns: ExtremeBloodthirstWeakTurns,
                 Creature,
                 null);
         }

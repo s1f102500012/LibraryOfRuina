@@ -55,6 +55,12 @@ public sealed class DeadButterfly : LorMonsterModel
     public const string PainfulReleaseMoveId = "PAINFUL_RELEASE";
     public const string PeacefulReposeMoveId = "PEACEFUL_REPOSE";
 
+    private const int AngryReleaseWeak = 1; // 愤怒释放：攻击后给予目标的虚弱层数，各进阶相同。
+    private const int SpiritReleaseBlock = 9; // 灵魂释放：攻击后自身获得的格挡，各进阶相同。
+    private const int PainfulReleaseBlock = 6; // 痛苦释放：自身获得的格挡，各进阶相同。
+    private const int PainfulReleaseFrail = 1; // 痛苦释放：给予目标的脆弱层数，各进阶相同。
+    private const int PeacefulReposeHits = 2; // 安息：攻击次数（单次伤害见 HeavyDamage），各进阶相同。
+
     public const string IdleTexturePath = DeadButterflyAssets.DeadButterflyIdleTexture;
     public const string AttackTexturePath = DeadButterflyAssets.DeadButterflyAttackTexture;
     public const string HitTexturePath = DeadButterflyAssets.DeadButterflyHitTexture;
@@ -180,7 +186,7 @@ public sealed class DeadButterfly : LorMonsterModel
         _move4 = new MoveState(
             PeacefulReposeMoveId,
             PeacefulReposeMove,
-            new MultiAttackIntent(HeavyDamage, 2));
+            new MultiAttackIntent(HeavyDamage, PeacefulReposeHits));
 
         LinkConfiguredMoveSequence();
         MonsterState initialState = StateFor(_sequence[0]);
@@ -224,7 +230,7 @@ public sealed class DeadButterfly : LorMonsterModel
 
         if (targets.Count > 0)
         {
-            await PowerCmdCompat.Apply<WeakPower>(targets, 1m, Creature, null);
+            await PowerCmdCompat.Apply<WeakPower>(targets, AngryReleaseWeak, Creature, null);
         }
     }
 
@@ -232,23 +238,23 @@ public sealed class DeadButterfly : LorMonsterModel
     {
         LocalOggOneShotPlayer.Play(AttackSfxPath, -2f);
         await ExecuteAttackSegment(SpiritDamage);
-        await CreatureCmd.GainBlock(Creature, 9, ValueProp.Move, null);
+        await CreatureCmd.GainBlock(Creature, SpiritReleaseBlock, ValueProp.Move, null);
     }
 
     private async Task PainfulReleaseMove(IReadOnlyList<Creature> targets)
     {
         await CreatureCmd.TriggerAnim(Creature, "Cast", ScaleDuration(0.05f));
-        await CreatureCmd.GainBlock(Creature, 6, ValueProp.Move, null);
+        await CreatureCmd.GainBlock(Creature, PainfulReleaseBlock, ValueProp.Move, null);
 
         if (targets.Count > 0)
         {
-            await PowerCmdCompat.Apply<FrailPower>(targets, 1m, Creature, null);
+            await PowerCmdCompat.Apply<FrailPower>(targets, PainfulReleaseFrail, Creature, null);
         }
     }
 
     private async Task PeacefulReposeMove(IReadOnlyList<Creature> targets)
     {
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < PeacefulReposeHits; i++)
         {
             if (Creature.IsDead) return;
             LocalOggOneShotPlayer.Play(AttackSfxPath, -2f);
@@ -263,7 +269,7 @@ public sealed class DeadButterfly : LorMonsterModel
         yield return new SingleAttackIntent(SpiritDamage);
         yield return new DefendIntent();
         yield return new DebuffIntent();
-        yield return new MultiAttackIntent(HeavyDamage, 2);
+        yield return new MultiAttackIntent(HeavyDamage, PeacefulReposeHits);
     }
 
     private static float ScaleDuration(float seconds) => seconds * AnimationDurationScale;

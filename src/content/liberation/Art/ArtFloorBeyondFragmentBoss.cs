@@ -33,6 +33,18 @@ public sealed class ArtFloorBeyondFragmentBoss : LiberationPhaseBossMonster
     private const string BeyondFragmentEgoMoveId = "BEYOND_FRAGMENT_EGO";
     private const float SegmentDelaySeconds = AbnormalityAnimHelper.DefaultAttackSegmentDelaySeconds;
 
+    private const int MelodiousSongHits = 3; // 悠扬的歌声：攻击次数（单次伤害见 MelodiousSongDamage），各进阶相同。
+    private const int MelodiousSongWeak = 1; // 悠扬的歌声：每段给予受到未被格挡伤害的玩家的虚弱层数，各进阶相同。
+    private const int MelodiousSongWeakTurns = 1; // 悠扬的歌声：虚弱的持续回合数，各进阶相同。
+    private const int MelodiousSongFlaw = 1; // 悠扬的歌声：每段给予受到未被格挡伤害的玩家的破绽层数，各进阶相同。
+    private const int MelodiousSongFlawTurns = 1; // 悠扬的歌声：破绽的持续回合数，各进阶相同。
+    private const int MelodiousSongRapidWear = 2; // 悠扬的歌声：每段给予受到未被格挡伤害的玩家的易损层数，各进阶相同。
+    private const int MelodiousSongRapidWearTurns = 1; // 悠扬的歌声：易损的持续回合数，各进阶相同。
+    private const int PenetrateEpiphany = 1; // 穿透：攻击后加入每名存活玩家抽牌堆的顿悟张数，各进阶相同。
+    private const int BoundaryThornEpiphany = 1; // 境界之刺：攻击前加入每名存活玩家抽牌堆的顿悟张数，各进阶相同。
+    private const int OtherworldlyEchoHits = 3; // 异界的回响：无差别攻击次数（单次伤害见 OtherworldlyEchoDamage），各进阶相同。
+    private const int OtherworldlyEchoStrengthPerEpiphany = 3; // 异界的回响：每移除一张顿悟，自身获得的力量，各进阶相同。
+
     public const string Root = ArtFloorAssets.BeyondFragmentMonsterRoot;
     public const string IdleTexturePath = Root + "beyond_fragment_idle.png";
     public const string HitTexturePath = Root + "beyond_fragment_hit.png";
@@ -153,7 +165,7 @@ public sealed class ArtFloorBeyondFragmentBoss : LiberationPhaseBossMonster
         var melodiousSong = new MoveState(
             MelodiousSongMoveId,
             MelodiousSongMove,
-            new CombinedAttackDebuffIntent(() => MelodiousSongDamage, () => 3)
+            new CombinedAttackDebuffIntent(() => MelodiousSongDamage, () => MelodiousSongHits)
             );
 
         var penetrate = new MoveState(
@@ -161,20 +173,20 @@ public sealed class ArtFloorBeyondFragmentBoss : LiberationPhaseBossMonster
             PenetrateMove,
             new SingleAttackIntent(() => PenetrateDamage),
             new DetailedStatusCardIntent<CosmicFragmentEpiphanyCard>(
-                1, PileType.Draw, showSingleTargetMarker: false));
+                PenetrateEpiphany, PileType.Draw, showSingleTargetMarker: false));
 
         var boundaryThorn = new MoveState(
             BoundaryThornMoveId,
             BoundaryThornMove,
             new DetailedStatusCardIntent<CosmicFragmentEpiphanyCard>(
-                1, PileType.Draw, showSingleTargetMarker: false),
+                BoundaryThornEpiphany, PileType.Draw, showSingleTargetMarker: false),
             new CombinedAttackBuffIntent(() => BoundaryThornDamage)
             );
 
         var otherworldlyEcho = new MoveState(
             OtherworldlyEchoMoveId,
             OtherworldlyEchoMove,
-            new IndiscriminateAttackIntent(() => OtherworldlyEchoDamage, () => 3, null),
+            new IndiscriminateAttackIntent(() => OtherworldlyEchoDamage, () => OtherworldlyEchoHits, null),
             new BuffIntent());
 
         _egoState = new MoveState(
@@ -213,15 +225,20 @@ public sealed class ArtFloorBeyondFragmentBoss : LiberationPhaseBossMonster
 
     private async Task MelodiousSongMove(IReadOnlyList<Creature> targets)
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < MelodiousSongHits; i++)
         {
             LocalOggOneShotPlayer.Play(abnormalities.CosmicFragment.CosmicFragment.SingingSfxPath, -2f);
             AttackCommand attack = await ExecuteGroupAttack(MelodiousSongDamage, "Attack2", "vfx/vfx_attack_blunt");
             foreach (Creature target in GetUnblockedPlayerHitTargets(attack))
             {
-                await LibraryPowerCmd.Apply<LibraryWeakPower>(target, 1, 1, Creature, null);
-                await LibraryPowerCmd.Apply<LibraryDisarmPower>(target, 1, 1, Creature, null);
-                await LibraryPowerCmd.Apply<LibraryVulnerablePower>(target, 2, 1, Creature, null);
+                await LibraryPowerCmd.Apply<LibraryWeakPower>(target, MelodiousSongWeak, MelodiousSongWeakTurns, Creature, null);
+                await LibraryPowerCmd.Apply<LibraryDisarmPower>(target, MelodiousSongFlaw, MelodiousSongFlawTurns, Creature, null);
+                await LibraryPowerCmd.Apply<LibraryVulnerablePower>(
+                    target,
+                    MelodiousSongRapidWear,
+                    MelodiousSongRapidWearTurns,
+                    Creature,
+                    null);
             }
         }
 
@@ -232,13 +249,13 @@ public sealed class ArtFloorBeyondFragmentBoss : LiberationPhaseBossMonster
     {
         LocalOggOneShotPlayer.Play(abnormalities.CosmicFragment.CosmicFragment.AttackSfxPath, -2f);
         await ExecuteGroupAttack(PenetrateDamage, "Attack", "vfx/vfx_attack_slash");
-        await AddEpiphanyToPlayers(1);
+        await AddEpiphanyToPlayers(PenetrateEpiphany);
         AdvanceBaseCadence();
     }
 
     private async Task BoundaryThornMove(IReadOnlyList<Creature> targets)
     {
-        await AddEpiphanyToPlayers(1);
+        await AddEpiphanyToPlayers(BoundaryThornEpiphany);
 
         LocalOggOneShotPlayer.Play(abnormalities.CosmicFragment.CosmicFragment.AttackSfxPath, -2f);
         await ExecuteGroupAttack(BoundaryThornDamage, "Attack", "vfx/vfx_attack_slash");
@@ -267,7 +284,7 @@ public sealed class ArtFloorBeyondFragmentBoss : LiberationPhaseBossMonster
             consumed++;
         }
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < OtherworldlyEchoHits; i++)
         {
             LocalOggOneShotPlayer.Play(abnormalities.CosmicFragment.CosmicFragment.EchoAttackSfxPath, -2f);
             await ExecuteGroupAttack(OtherworldlyEchoDamage, "Attack2", "vfx/vfx_attack_slash", indiscriminate: true);
@@ -276,7 +293,7 @@ public sealed class ArtFloorBeyondFragmentBoss : LiberationPhaseBossMonster
 
         if (consumed > 0)
         {
-            await PowerCmdCompat.Apply<StrengthPower>(Creature, consumed * 3, Creature, null);
+            await PowerCmdCompat.Apply<StrengthPower>(Creature, consumed * OtherworldlyEchoStrengthPerEpiphany, Creature, null);
         }
 
         AdvanceBaseCadence();
@@ -378,14 +395,14 @@ public sealed class ArtFloorBeyondFragmentBoss : LiberationPhaseBossMonster
 
     private IEnumerable<AbstractIntent> EnumerateIntentAssets()
     {
-        yield return new CombinedAttackDebuffIntent(() => MelodiousSongDamage, () => 3);
+        yield return new CombinedAttackDebuffIntent(() => MelodiousSongDamage, () => MelodiousSongHits);
         yield return new DebuffIntent(strong: true);
         yield return new SingleAttackIntent(() => PenetrateDamage);
         yield return new DetailedStatusCardIntent<CosmicFragmentEpiphanyCard>(
-            1, PileType.Draw, showSingleTargetMarker: false);
+            PenetrateEpiphany, PileType.Draw, showSingleTargetMarker: false);
         yield return new CombinedAttackBuffIntent(() => BoundaryThornDamage);
         yield return new BuffIntent();
-        yield return new IndiscriminateAttackIntent(() => OtherworldlyEchoDamage, () => 3, null);
+        yield return new IndiscriminateAttackIntent(() => OtherworldlyEchoDamage, () => OtherworldlyEchoHits, null);
         yield return new BuffIntent();
         yield return new HealIntent();
         yield return new DebuffIntent(strong: true);

@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using HarmonyLib;
+using LibraryOfRuina.core.settings;
 using LibraryOfRuina.content.acts;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -13,6 +14,7 @@ internal static class BookShadowLibraryActAncientGrant
     internal static async Task GrantToHostAsync(AncientEventModel ancient)
     {
         if (ancient.Owner is not { } eventOwner
+            || !LibraryRunSettings.IsMonsterExtensionEnabled(eventOwner.RunState)
             || eventOwner.RunState.Act is not LibraryOfRuinaActModel)
         {
             return;

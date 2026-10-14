@@ -28,6 +28,7 @@ public sealed class HistoryFloorEndLightBoss : LiberationPhaseBossMonster
     private const string MatchEnhancementMoveId = "MATCH_ENHANCEMENT";
     internal const string BackgroundTextScope = "history_floor_liberation_phase_1";
     private const int Phase = 1;
+    private const int MatchEnhancementStrength = 1; // 火柴强化：其他存活敌人获得的力量，各进阶相同。
     private const float BackgroundTextIntervalSeconds = 5f;
 
     public override int DefaultChaoResistance => 30;
@@ -162,7 +163,7 @@ public sealed class HistoryFloorEndLightBoss : LiberationPhaseBossMonster
         var matchEnhancement = new MoveState(
             MatchEnhancementMoveId,
             MatchEnhancementMove,
-            new DetailedBuffIntent<StrengthPower>(1, DetailedBuffTargetScope.OtherEnemies));
+            new DetailedBuffIntent<StrengthPower>(MatchEnhancementStrength, DetailedBuffTargetScope.OtherEnemies));
 
         var chooser = new ConditionalBranchState("CHOOSER");
         chooser.AddState(endLight, () => (_turnIndex + 1) % 4 == 0);
@@ -207,7 +208,7 @@ public sealed class HistoryFloorEndLightBoss : LiberationPhaseBossMonster
             .ToArray();
         foreach (Creature enemy in others)
         {
-            await PowerCmdCompat.Apply<StrengthPower>(enemy, 1m, Creature, null);
+            await PowerCmdCompat.Apply<StrengthPower>(enemy, MatchEnhancementStrength, Creature, null);
         }
 
         AdvanceTurn();

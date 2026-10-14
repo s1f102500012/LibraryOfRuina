@@ -100,8 +100,8 @@ internal static class LibrarySecondAscensionPanelMaxPatch
     {
         if (LibrarySecondAscensionUi.IsSecondPanel(__instance))
         {
-            __instance.Visible = LibrarySecondAscensionState.IsSelectionEnabled;
-            if (LibrarySecondAscensionState.IsSelectionEnabled)
+            __instance.Visible = LibrarySecondAscensionUi.IsPanelEnabled(__instance);
+            if (__instance.Visible)
             {
                 LibrarySecondAscensionUi.RefreshSecondPanelDeferred(__instance);
             }
@@ -244,7 +244,7 @@ internal static class LibrarySecondAscensionUi
         }
 
         NAscensionPanel? existing = FindSecondPanel(screen);
-        if (!LibrarySecondAscensionState.IsSelectionEnabled)
+        if (mode != MultiplayerUiMode.Client && !LibrarySecondAscensionState.IsSelectionEnabled)
         {
             if (existing != null)
             {
@@ -286,7 +286,7 @@ internal static class LibrarySecondAscensionUi
         }
 
         RefreshSecondPanelDeferred(panel);
-        panel.Visible = true;
+        panel.Visible = mode != MultiplayerUiMode.Client || GetLobbyLevel(screen) > 0;
     }
 
     public static bool IsSecondPanel(NAscensionPanel panel) => panel.Name == PanelName;
@@ -386,6 +386,11 @@ internal static class LibrarySecondAscensionUi
         int level = lobby.NetService.Type == NetGameType.Singleplayer && lobby.GameMode == GameMode.Standard
             ? LibrarySecondAscensionState.PreferredLevel
             : GetLobbyLevel(screen);
+        if (lobby.NetService.Type == NetGameType.Client)
+        {
+            panel.Visible = level > 0;
+        }
+
         if (level >= 0 && panel.Ascension != level)
         {
             panel.SetAscensionLevel(level);
@@ -395,14 +400,8 @@ internal static class LibrarySecondAscensionUi
 
     public static bool LobbyHasOnlySecondAscensionCarrier(Control screen)
     {
-        if (!LibrarySecondAscensionState.IsSelectionEnabled)
-        {
-            return false;
-        }
-
         StartRunLobby? lobby = GetLobby(screen);
         return lobby != null
-               && FindSecondPanel(screen) != null
                && (lobby.Modifiers.Count == 0 || lobby.Modifiers.All(modifier => modifier is LibrarySecondAscensionModifier));
     }
 
@@ -414,7 +413,7 @@ internal static class LibrarySecondAscensionUi
             return;
         }
 
-        bool visible = characterUnlocked && LibrarySecondAscensionState.IsSelectionEnabled;
+        bool visible = characterUnlocked && IsPanelEnabled(panel);
         panel.Visible = visible;
         if (visible && !screen.Lobby.NetService.Type.IsMultiplayer())
         {
@@ -466,12 +465,33 @@ internal static class LibrarySecondAscensionUi
         RemovePanelHotkeys(panel);
         panel.SetMaxAscension(LibrarySecondAscensionConfig.MaxLevel);
         panel.SetAscensionLevel(level);
-        panel.Visible = true;
+        panel.Visible = interactive || level > 0;
         ApplyGoldStyle(panel);
+    }
+
+    internal static bool IsPanelEnabled(NAscensionPanel panel)
+    {
+        // 客机面板按房主同步的等级显示，创建能力不受本地实验性内容开关影响。
+        for (Node? node = panel.GetParent(); node != null; node = node.GetParent())
+        {
+            if (node is Control screen && GetLobby(screen) is { } lobby)
+            {
+                return lobby.NetService.Type == NetGameType.Client
+                    ? LibrarySecondAscensionState.GetLevelFromModifiers(lobby.Modifiers) > 0
+                    : LibrarySecondAscensionState.IsSelectionEnabled;
+            }
+        }
+
+        return LibrarySecondAscensionState.IsSelectionEnabled;
     }
 
     private static void OnSecondPanelLevelChanged(Control screen, NAscensionPanel panel)
     {
+        if (GetLobby(screen)?.NetService.Type == NetGameType.Client)
+        {
+            return;
+        }
+
         LibrarySecondAscensionState.PreferredLevel = panel.Ascension;
         if (GetLobby(screen) is StartRunLobby lobby
             && (lobby.NetService.Type == NetGameType.Host

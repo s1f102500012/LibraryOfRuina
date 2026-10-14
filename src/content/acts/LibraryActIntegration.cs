@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using ActLikeIt2;
 using HarmonyLib;
+using LibraryOfRuina.core.settings;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
@@ -36,6 +37,7 @@ internal static class LibraryActRegistrationPatch
         {
             CanonicalAct = ModelDb.Act<ReverberationEnsembleAct>(),
             ActNumber = ReverberationEnsembleAct.ActNumber,
+            IsAvailable = LibraryRunSettings.IsMonsterExtensionEnabled,
             OptionDescription = new LocString("acts", "REVERBERATION_ENSEMBLE_ACT.description"),
             CustomCreateMap = static (_, _) => new ReverberationEnsembleActMap()
         });
@@ -57,6 +59,7 @@ internal static class LibraryActRegistrationPatch
         {
             CanonicalAct = act,
             ActNumber = actNumber,
+            IsAvailable = LibraryRunSettings.IsMonsterExtensionEnabled,
             SelectionGroupId = groupId,
             SelectionGroupTitle = new LocString(
                 "acts",

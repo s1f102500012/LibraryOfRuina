@@ -39,13 +39,18 @@ public sealed class CosmicFragment : LorMonsterModel
     private static readonly string CosmicFragmentPageRelicTitleLocKey =
         $"{ModelDb.GetId<CosmicFragmentPageRelic>().Entry}.title";
 
+    private const int PenetrateEpiphany = 2; // 穿透：攻击后加入被攻击玩家抽牌堆的顿悟张数，各进阶相同。
+    private const int EchoHits = 3; // 异界的回响：攻击次数（单次伤害见 EchoDmg），各进阶相同。
+    private const int EchoInitialStrengthGain = 2; // 异界的回响：首次攻击后自身获得的力量，各进阶相同。
+    private const long EchoStrengthGainMultiplier = 2; // 异界的回响：每次结算后下一次力量获得量的倍率，各进阶相同。
+
     public override int MinInitialHp =>
         AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 151, 149);
 
     public override int MaxInitialHp =>
         AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 155, 152);
 
-    private int _nextEchoStrengthGain = 2;
+    private int _nextEchoStrengthGain = EchoInitialStrengthGain;
 
     public override int DefaultChaoResistance => 120;
 
@@ -119,12 +124,12 @@ public sealed class CosmicFragment : LorMonsterModel
             PenetrateMove,
             new SingleAttackIntent(PenetrateDmg),
             new DetailedStatusCardIntent<CosmicFragmentEpiphanyCard>(
-                2, PileType.Draw, showSingleTargetMarker: false));
+                PenetrateEpiphany, PileType.Draw, showSingleTargetMarker: false));
 
         var echo = new MoveState(
             "OTHERWORLDLY_ECHO",
             OtherworldlyEchoMove,
-            new MultiAttackIntent(EchoDmg, 3),
+            new MultiAttackIntent(EchoDmg, EchoHits),
             new BuffIntent());
 
         penetrate.FollowUpState = echo;
@@ -149,7 +154,7 @@ public sealed class CosmicFragment : LorMonsterModel
             .ToList();
 
         await CardPileCmdCompat.AddToCombatAndPreview<CosmicFragmentEpiphanyCard>(
-            hitTargets, PileType.Draw, 2, addedByPlayer: false);
+            hitTargets, PileType.Draw, PenetrateEpiphany, addedByPlayer: false);
         
     }
 
@@ -177,7 +182,7 @@ public sealed class CosmicFragment : LorMonsterModel
             CosmicFragmentEpiphanyCard.UpgradeFromCosmicFragment(epiphany);
         }
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < EchoHits; i++)
         {
             if (Creature.IsDead || Creature.CombatState == null)
             {
@@ -203,15 +208,15 @@ public sealed class CosmicFragment : LorMonsterModel
 
         await PowerCmdCompat.Apply<StrengthPower>(Creature, _nextEchoStrengthGain, Creature, null);
         // Match the vanilla PowerModel amount limit without overflowing the next gain.
-        _nextEchoStrengthGain = (int)Math.Min(_nextEchoStrengthGain * 2L, 999_999_999L);
+        _nextEchoStrengthGain = (int)Math.Min(_nextEchoStrengthGain * EchoStrengthGainMultiplier, 999_999_999L);
     }
 
     private IEnumerable<AbstractIntent> EnumerateIntentAssets()
     {
         yield return new SingleAttackIntent(PenetrateDmg);
         yield return new DetailedStatusCardIntent<CosmicFragmentEpiphanyCard>(
-            2, PileType.Draw, showSingleTargetMarker: false);
-        yield return new MultiAttackIntent(EchoDmg, 3);
+            PenetrateEpiphany, PileType.Draw, showSingleTargetMarker: false);
+        yield return new MultiAttackIntent(EchoDmg, EchoHits);
         yield return new DetailedBuffIntent<LibraryWeakPower>(99);
     }
 

@@ -290,7 +290,7 @@
   "SMILING_BODIES_CORPSE_LAUGHS_CHOICE_CARD.title": "尸体在笑",
   "SMILING_BODIES_CORPSE_LAUGHS_CHOICE_CARD.description": "如果你的生命值低于[blue]{LowHpThresholdPercent}%[/blue]，每当你受到[gold]未被格挡的伤害[/gold]时，对所有敌人造成[red]{ChaosDamage}[/red]点[gold]混乱伤害[/gold]，并给予其[blue]{Vulnerable}[/blue]层永久[gold]易损[/gold]。",
   "SMILING_BODIES_CORPSE_ABSORPTION_CHOICE_CARD.title": "死尸吸收",
-  "SMILING_BODIES_CORPSE_ABSORPTION_CHOICE_CARD.description": "你击杀敌人时，回复最大生命值[green]{HealPercent}%[/green]的生命。每场战斗最多触发[blue]{HealUses}[/blue]次。回合开始时，你在本场战斗中每累计回复最大生命值10%的生命，就获得[blue]1[/blue]层永久[gold]强壮[/gold]。",
+  "SMILING_BODIES_CORPSE_ABSORPTION_CHOICE_CARD.description": "你击杀敌人时，回复最大生命值[green]{HealPercent}%[/green]的生命。每场战斗最多触发[blue]{HealUses}[/blue]次。回合开始时，你在本场战斗中每累计回复最大生命值{StrongHealPercent}%的生命，就获得[blue]{StrongPerThreshold}[/blue]层永久[gold]强壮[/gold]。",
   "SMILING_BODIES_CORPSE_MOUNTAIN_CHOICE_CARD.title": "尸山",
   "SMILING_BODIES_CORPSE_MOUNTAIN_CHOICE_CARD.description": "[lb][gold]右键点击[/gold][rb]\n立即击杀除你以外的所有[gold]队友[/gold]，每击杀一名，你获得[blue]{AllyBuffs}[/blue]层永久[gold]强壮[/gold]、[gold]忍耐[/gold]、[gold]迅捷[/gold]，以及本场战斗中[blue]{EnergyBonus}[/blue]点[gold]能量上限[/gold]。每次使用，你的最大生命值减少[red]{MaxHpLossPercent}%[/red]。冷却[blue]{Cooldown}[/blue]回合。",
   "BIG_BAD_WOLF_PREDATORY_INSTINCT_CHOICE_CARD.title": "掠食本能",

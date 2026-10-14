@@ -58,6 +58,14 @@ public sealed class OzmaReturnItToMeCard : CardModel
     [SavedProperty(SerializationCondition.SaveIfNotTypeDefault)]
     public bool RestoreAfterCurrentPlay { get; private set; }
 
+    protected override void AfterCloned()
+    {
+        base.AfterCloned();
+        // 复制的“还给我”通过原卡快照独立归还，避免与来源牌重复使用同一个战斗实例。
+        _originalRuntimeCard = null;
+        RestoreAfterCurrentPlay = false;
+    }
+
     public void SetOriginal(CardModel original)
     {
         OriginalCard = original.ToSerializable();
@@ -85,7 +93,11 @@ public sealed class OzmaReturnItToMeCard : CardModel
         }
 
         CardModel? original;
-        if (_originalRuntimeCard != null && combatState.ContainsCard(_originalRuntimeCard))
+        // Transform 会直接把替换卡插入牌堆；只有同一玩家尚未入堆的原卡才能复用。
+        if (_originalRuntimeCard != null
+            && _originalRuntimeCard.Owner == owner
+            && _originalRuntimeCard.Pile == null
+            && combatState.ContainsCard(_originalRuntimeCard))
         {
             original = _originalRuntimeCard;
             original.HasBeenRemovedFromState = false;

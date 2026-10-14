@@ -27,6 +27,8 @@ public sealed class SmilingBodiesPageRelic : ModalPageRelic<SmilingBodiesPageMod
     public const int CorpseLaughsVulnerable = 1;
     public const int AbsorptionHealPercent = 2;
     public const int AbsorptionMaxHealsPerCombat = 2;
+    public const int AbsorptionHealPercentPerStrong = 10; // 死尸吸收：本场战斗累计回复量每达到最大生命值的该百分比，回合开始时获得一次永久强壮。
+    public const int AbsorptionStrongPerHealThreshold = 1; // 死尸吸收：每达到一次上述回复阈值获得的永久强壮层数。
     public const int CorpseMountainBuffStacks = 3;
     public const int CorpseMountainEnergyBonusPerAlly = 1;
     public const int CorpseMountainCooldown = 12;
@@ -82,6 +84,8 @@ public sealed class SmilingBodiesPageRelic : ModalPageRelic<SmilingBodiesPageMod
         new DynamicVar("Vulnerable", CorpseLaughsVulnerable),
         new DynamicVar("HealPercent", AbsorptionHealPercent),
         new DynamicVar("HealUses", AbsorptionMaxHealsPerCombat),
+        new DynamicVar("StrongHealPercent", AbsorptionHealPercentPerStrong),
+        new DynamicVar("StrongPerThreshold", AbsorptionStrongPerHealThreshold),
         new DynamicVar("RemainingHeals", AbsorptionMaxHealsPerCombat),
         new DynamicVar("AllyBuffs", CorpseMountainBuffStacks),
         new DynamicVar("EnergyBonus", CorpseMountainEnergyBonusPerAlly),
@@ -439,7 +443,8 @@ public sealed class SmilingBodiesPageRelic : ModalPageRelic<SmilingBodiesPageMod
             return;
         }
 
-        int targetGranted = AbsorptionCumulativeHealPercent / 10;
+        int targetGranted = AbsorptionCumulativeHealPercent / AbsorptionHealPercentPerStrong
+            * AbsorptionStrongPerHealThreshold;
         int toGrant = targetGranted - AbsorptionGrantedThisCombat;
         if (toGrant <= 0)
         {
@@ -613,7 +618,7 @@ public sealed class SmilingBodiesPageRelic : ModalPageRelic<SmilingBodiesPageMod
             ? Math.Max(1, (int)Math.Ceiling(maxHp * AbsorptionHealPercent / 100m))
             : 0;
         DynamicVars["HealThreshold"].BaseValue = maxHp > 0
-            ? Math.Max(1, (int)Math.Ceiling(maxHp * 10 / 100m))
+            ? Math.Max(1, (int)Math.Ceiling(maxHp * AbsorptionHealPercentPerStrong / 100m))
             : 0;
         DynamicVars["MaxHpLoss"].BaseValue = maxHp > 0
             ? Math.Max(1, (int)Math.Ceiling(maxHp * CorpseMountainMaxHpLossPercent / 100m))

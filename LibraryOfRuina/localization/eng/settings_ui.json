@@ -43,5 +43,10 @@
   "LIBRARYOFRUINA-INJECTION_MISMATCH.host_injected": "The host is running Library of Ruina content, but Library of Ruina did not load its content on this computer this session (\"Enable Library of Ruina content\" is off, or an incompatible mod was detected). Continuing would desync the run. Turn the setting on, restart the game, and join again.",
   "LIBRARYOFRUINA-INJECTION_MISMATCH.host_not_injected": "The host did not load Library of Ruina content this session (\"Enable Library of Ruina content\" is off, or an incompatible mod was detected), but it is loaded on this computer. Continuing would desync the run. Both players must match: turn the setting off here and restart the game, or have the host turn it on and restart the game.",
   "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.title": "About Intent Graph",
-  "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.body": "Detected Chaofan's workshop mod Intent Graph (3747528152).\nThis mod's intent graph is adapted from Intent Graph to display Library of Ruina monsters' unique intents: when you hover a Library of Ruina monster, the Intent Graph panel shows this mod's graph, while the panel's position, pinning and scale still follow Intent Graph's settings. Other monsters are unaffected.\nThis feature will be removed if the original author requests it."
+  "LIBRARYOFRUINA-INTENT_GRAPH_NOTICE.body": "Detected Chaofan's workshop mod Intent Graph (3747528152).\nThis mod's intent graph is adapted from Intent Graph to display Library of Ruina monsters' unique intents: when you hover a Library of Ruina monster, the Intent Graph panel shows this mod's graph, while the panel's position, pinning and scale still follow Intent Graph's settings. Other monsters are unaffected.\nThis feature will be removed if the original author requests it.",
+  "LIBRARYOFRUINA-HOST_SETTINGS_NOTICE.title": "The host shares gameplay and combat animation settings when the run starts. They remain fixed for the run. Audio, language, tutorials and UI remain personal.",
+  "LIBRARYOFRUINA-SECOND_ASCENSION_LEVEL.title": "Second Ascension level",
+  "LIBRARYOFRUINA-RUN_SETTINGS_NOTICE.title": "Run gameplay and combat animation settings (host settings in multiplayer, read-only; personal preferences are preserved):",
+  "LIBRARYOFRUINA-SETTING_DISABLED.title": "Off",
+  "LIBRARYOFRUINA-SETTING_ENABLED.title": "On"
 }

@@ -34,12 +34,21 @@ public sealed class QueenBeeWorker : LorMonsterModel
     internal const string ChooserStateId = "QUEEN_BEE_WORKER_COND";
 
     private const int CarryLarvaBlock = 8;
+    private const int PromoteGrowthHits = 3; // 促进增长：攻击次数（单次伤害见 PromoteGrowthDamage），各进阶相同。
     private const int DeathEmbraceDamage = 15;
     private const int DeathEmbraceChao = 0;
     private const decimal NutrientMixHealPercent = 0.05m;
     private const float SegmentDelaySeconds = 0.78f;
 
     public const int StaggerResistance = 30;
+
+    // 促进增长：每段攻击的动画触发与音效，按段数循环取用。
+    private static readonly (string Trigger, string SfxPath)[] PromoteGrowthSegments =
+    [
+        ("Attack", HistoryFloorWorkerBee.AttackSlashSfxPath),
+        ("Attack2", HistoryFloorWorkerBee.AttackSlashSfxPath),
+        ("Attack", HistoryFloorWorkerBee.AttackThrustSfxPath)
+    ];
 
     private MoveState? _deathEmbraceState;
     private MoveState? _promoteGrowthState;
@@ -130,7 +139,7 @@ public sealed class QueenBeeWorker : LorMonsterModel
         var promoteGrowth = new MoveState(
             PromoteGrowthMoveId,
             PromoteGrowthMove,
-            new MultiAttackIntent(PromoteGrowthDamage, 3));
+            new MultiAttackIntent(PromoteGrowthDamage, PromoteGrowthHits));
         _promoteGrowthState = promoteGrowth;
 
         var deathEmbrace = new MoveState(
@@ -283,9 +292,12 @@ public sealed class QueenBeeWorker : LorMonsterModel
 
     private async Task PromoteGrowthMove(IReadOnlyList<Creature> targets)
     {
-        await ExecuteAttackSegment("Attack", PromoteGrowthDamage, HistoryFloorWorkerBee.AttackSlashSfxPath);
-        await ExecuteAttackSegment("Attack2", PromoteGrowthDamage, HistoryFloorWorkerBee.AttackSlashSfxPath);
-        await ExecuteAttackSegment("Attack", PromoteGrowthDamage, HistoryFloorWorkerBee.AttackThrustSfxPath);
+        for (int hit = 0; hit < PromoteGrowthHits; hit++)
+        {
+            (string trigger, string sfxPath) = PromoteGrowthSegments[hit % PromoteGrowthSegments.Length];
+            await ExecuteAttackSegment(trigger, PromoteGrowthDamage, sfxPath);
+        }
+
         AdvanceCadence();
     }
 
@@ -343,7 +355,7 @@ public sealed class QueenBeeWorker : LorMonsterModel
         yield return new SingleAttackIntent(GuardQueenDamage);
         yield return new DefendIntent();
         yield return new HealIntent();
-        yield return new MultiAttackIntent(PromoteGrowthDamage, 3);
+        yield return new MultiAttackIntent(PromoteGrowthDamage, PromoteGrowthHits);
         yield return new QueenBeeDeathEmbraceIntent(DeathEmbraceDamage);
     }
 }

@@ -34,9 +34,9 @@ public sealed class LiteratureFloorRedEyesBoss :
     public const string UnknownMoveId = "UNKNOWN";
     public const string ScreechMoveId = "SCREECH";
 
-    public const int FlickeringEyesBlock = 8;
-    public const int ScreechHits = 3;
-    public const int CocoonStacksApplied = 1;
+    public const int FlickeringEyesBlock = 8; // 闪烁的眼瞳：每只存活小蜘蛛获得的格挡，各进阶相同。
+    public const int ScreechHits = 3; // 尖啸：攻击次数（单次伤害见 ScreechDamage），各进阶相同。
+    public const int CocoonStacksApplied = 1; // 尖啸：意图显示的茧缚层数，攻击后每名存活玩家获得或刷新一次茧缚，各进阶相同。
 
     public const string IdleTexturePath = LiteratureFloorAssets.RedEyesMonsterRoot + "red_eyes_idle.png";
     public const string StrikeTexturePath = LiteratureFloorAssets.RedEyesMonsterRoot + "red_eyes_strike.png";
@@ -355,7 +355,7 @@ public sealed class LiteratureFloorRedEyesBoss :
             ScreechMoveId,
             ScreechMove,
             new MultiAttackIntent(ScreechDamage, ScreechHits),
-            new BadgedDebuffIntent(IntentBadge.FromPower<LiteratureFloorCocoonBindPower>(), 1));
+            new BadgedDebuffIntent(IntentBadge.FromPower<LiteratureFloorCocoonBindPower>(), CocoonStacksApplied));
         MoveState reviveAndEmpower = CreateReviveAndEmpowerState();
 
         var afterScreech = new ConditionalBranchState("AFTER_SCREECH");

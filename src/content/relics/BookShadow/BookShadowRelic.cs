@@ -72,7 +72,8 @@ public sealed class BookShadowRelic : LibraryRelicModel
     internal async Task GrantVanillaCharacterProtection()
     {
         IRunState runState = Owner.RunState;
-        if (ProtectionProcessed
+        if (!LibraryRunSettings.IsMonsterExtensionEnabled(runState)
+            || ProtectionProcessed
             || runState.CurrentActIndex != ProtectionActIndex
             || runState.Act is not LibraryOfRuinaActModel)
         {
@@ -80,7 +81,7 @@ public sealed class BookShadowRelic : LibraryRelicModel
         }
 
         ProtectionProcessed = true;
-        if (!await ResolveProtectionEnabled())
+        if (!LibraryRunSettings.IsVanillaCharacterProtectionEnabled(runState))
         {
             return;
         }
@@ -104,26 +105,6 @@ public sealed class BookShadowRelic : LibraryRelicModel
                 slotIndex++;
             }
         }
-    }
-
-    private async Task<bool> ResolveProtectionEnabled()
-    {
-        if (RunManager.Instance.NetService.Type == NetGameType.Singleplayer)
-        {
-            return LibraryOfRuinaSettings.VanillaCharacterProtectionEnabled;
-        }
-
-        // 书中之影由房主持有，各端使用房主同步的设置结果决定是否发放奖励。
-        var synchronizer = RunManager.Instance.PlayerChoiceSynchronizer;
-        uint choiceId = synchronizer.ReserveChoiceId(Owner);
-        if (LocalContext.IsMe(Owner))
-        {
-            bool enabled = LibraryOfRuinaSettings.VanillaCharacterProtectionEnabled;
-            synchronizer.SyncLocalChoice(Owner, choiceId, PlayerChoiceResult.FromIndex(enabled ? 1 : 0));
-            return enabled;
-        }
-
-        return (await synchronizer.WaitForRemoteChoice(Owner, choiceId)).AsIndex() == 1;
     }
 
     public override Task AfterRoomEntered(AbstractRoom room)

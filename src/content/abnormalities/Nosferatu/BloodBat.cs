@@ -26,6 +26,15 @@ public abstract class NosferatuBloodBatBase : LorMonsterModel
     protected const string VampirismMoveId = "VAMPIRISM";
     protected const string DeepFangsMoveId = "DEEP_FANGS";
 
+    private const int ThirstRapidWear = 3; // 干渴：给予所有存活玩家的易损层数，各进阶相同。
+    private const int ThirstRapidWearTurns = 1; // 干渴：易损的持续回合数，各进阶相同。
+    private const int ThirstBlood = 2; // 干渴：自身获得的鲜血层数，各进阶相同。
+    private const int VampirismHits = 1; // 吸血：攻击次数（单次伤害见 VampirismDamage），各进阶相同。
+    private const int VampirismBleed = 4; // 吸血：给予受到未被格挡伤害的玩家的流血层数，各进阶相同。
+    private const int VampirismBlood = 1; // 吸血：造成未被格挡伤害时自身获得的鲜血层数，各进阶相同。
+    private const int DeepFangsHits = 2; // 尖牙深入：攻击次数（单次伤害见 DeepFangsDamage），各进阶相同。
+    private const int DeepFangsBleed = 6; // 尖牙深入：给予受到未被格挡伤害的玩家的流血层数，各进阶相同。
+
     internal const string TextureRoot = Nosferatu.TextureRoot;
 
     internal static readonly string[] SharedAssetPaths =
@@ -84,28 +93,28 @@ public abstract class NosferatuBloodBatBase : LorMonsterModel
             ThirstMove,
             new BadgedDebuffIntent(
                 [
-                    IntentBadge.RapidWear(3, 1),
-                    IntentBadge.FromPower<NosferatuBloodPower>(2)
+                    IntentBadge.RapidWear(ThirstRapidWear, ThirstRapidWearTurns),
+                    IntentBadge.FromPower<NosferatuBloodPower>(ThirstBlood)
                 ],
-                amount: 4,
+                amount: ThirstRapidWear,
                 "BLOOD_BAT_THIRST.description"));
         var vampirism = new MoveState(
             VampirismMoveId,
             VampirismMove,
             new CombinedAttackDebuffIntent(
                 () => VampirismDamage,
-                () => 1,
+                () => VampirismHits,
                 "BLOOD_BAT_VAMPIRISM.description",
-                IntentBadge.Bleed(4),
-                IntentBadge.FromPower<NosferatuBloodPower>(1)));
+                IntentBadge.Bleed(VampirismBleed),
+                IntentBadge.FromPower<NosferatuBloodPower>(VampirismBlood)));
         var deepFangs = new MoveState(
             DeepFangsMoveId,
             DeepFangsMove,
             new CombinedAttackDebuffIntent(
                 () => DeepFangsDamage,
-                () => 2,
+                () => DeepFangsHits,
                 "BLOOD_BAT_DEEP_FANGS.description",
-                IntentBadge.Bleed(6)));
+                IntentBadge.Bleed(DeepFangsBleed)));
 
         var router = new DelegatingMonsterRouterState(
             "BLOOD_BAT_ROUTER",
@@ -146,13 +155,13 @@ public abstract class NosferatuBloodBatBase : LorMonsterModel
         {
             await LibraryPowerCmd.Apply<LibraryVulnerablePower>(
                     player,
-                    3,
-                    turns: 1,
+                    ThirstRapidWear,
+                    turns: ThirstRapidWearTurns,
                     Creature,
                     null);
         }
 
-        await NosferatuBloodPower.Change(Creature, 2, Creature);
+        await NosferatuBloodPower.Change(Creature, ThirstBlood, Creature);
     }
 
     private async Task VampirismMove(IReadOnlyList<Creature> targets)
@@ -162,20 +171,20 @@ public abstract class NosferatuBloodBatBase : LorMonsterModel
             -2f);
         GroupAttackOutcome attack = await ExecuteAttackDetailed(
             VampirismDamage,
-            hits: 1,
+            hits: VampirismHits,
             "Attack");
         foreach (Creature target in attack.UnblockedTargets.Distinct())
         {
             await PowerCmdCompat.ApplyDebuff<LibraryBleedingPower>(
                 target,
-                4,
+                VampirismBleed,
                 Creature,
                 null);
         }
 
         if (attack.AnyUnblocked)
         {
-            await NosferatuBloodPower.Change(Creature, 1, Creature);
+            await NosferatuBloodPower.Change(Creature, VampirismBlood, Creature);
         }
     }
 
@@ -186,13 +195,13 @@ public abstract class NosferatuBloodBatBase : LorMonsterModel
             -2f);
         GroupAttackOutcome attack = await ExecuteAttackDetailed(
             DeepFangsDamage,
-            hits: 2,
+            hits: DeepFangsHits,
             "Attack");
         foreach (Creature target in attack.UnblockedTargets.Distinct())
         {
             await PowerCmdCompat.ApplyDebuff<LibraryBleedingPower>(
                 target,
-                6,
+                DeepFangsBleed,
                 Creature,
                 null);
         }

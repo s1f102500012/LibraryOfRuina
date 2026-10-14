@@ -30,12 +30,14 @@ public sealed class LiteratureFloorBloodlustBoss :
     public const string DesireBurstMoveId = "DESIRE_BURST";
     public const string UnbearableMoveId = "UNBEARABLE";
 
-    public const int PersistenceHits = 2;
-    public const int DesireBurstHits = 3;
-    public const int DesireBurstHealMultiplier = 3;
-    public const int UnbearableHits = 4;
-    public const int UnbearableBleedMultiplier = 2;
-    public const int ChainsApplied = 2;
+    public const int PersistenceHits = 2; // 执著：攻击次数（单次伤害见 PersistenceDamage），各进阶相同。
+    public const int ObsessionHits = 1; // 执念：攻击次数（单次伤害见 ObsessionDamage），各进阶相同。
+    public const int DesireBurstHits = 3; // 欲望迸发：攻击次数（单次伤害见 DesireBurstDamage），各进阶相同。
+    public const int DesireBurstHealMultiplier = 3; // 欲望迸发：回复生命 = 招式开始时玩家最高流血层数 × 此倍率，各进阶相同。
+    public const int UnbearableHits = 4; // 无法忍受！！！：无差别攻击次数（单次伤害见 UnbearableDamage），各进阶相同。
+    public const int UnbearableFinisherHits = 1; // 无法忍受！！！：对每名存活玩家的终结攻击次数，各进阶相同。
+    public const int UnbearableBleedMultiplier = 2; // 无法忍受！！！：终结攻击每层流血追加的伤害，各进阶相同。
+    public const int ChainsApplied = 2; // 执念：攻击后给予所有存活玩家的魂缚锁链层数，各进阶相同。
 
     public const string IdleTexturePath = LiteratureFloorAssets.LiberationBloodlustMonsterRoot + "bloodlust_idle.png";
     public const string StrikeTexturePath = LiteratureFloorAssets.LiberationBloodlustMonsterRoot + "bloodlust_strike.png";
@@ -279,7 +281,7 @@ public sealed class LiteratureFloorBloodlustBoss :
             ObsessionMove,
             new CombinedAttackDebuffIntent(
                 ObsessionDamage,
-                1,
+                ObsessionHits,
                 "LITERATURE_FLOOR_BLOODLUST_OBSESSION.description",
                 IntentBadge.FromPower<ChainsOfBindingPower>(
                     ChainsApplied)),
@@ -301,7 +303,7 @@ public sealed class LiteratureFloorBloodlustBoss :
                 (_, previewTarget) =>
                     CalculateProjectedUnbearableFinisherDamage(
                         previewTarget),
-                () => 1,
+                () => UnbearableFinisherHits,
                 "LITERATURE_FLOOR_BLOODLUST_UNBEARABLE_FINISHER.description"));
         MoveState reviveAndEmpower = CreateReviveAndEmpowerState();
 
@@ -349,7 +351,7 @@ public sealed class LiteratureFloorBloodlustBoss :
     {
         await ExecuteTimedMultiAttack(
             ObsessionDamage,
-            1,
+            ObsessionHits,
             "Obsession",
             LiteratureFloorBloodlustAnimationContract
                 .ObsessionHitFrameTimesSeconds,

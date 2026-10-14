@@ -27,7 +27,7 @@ internal static class LibrarySecondAscensionState
     private static int? _pendingSingleplayerStandardLevel;
 
     public static bool IsSelectionEnabled =>
-        LibraryOfRuinaSettings.ExperimentalContentEnabled && LibraryOfRuinaSettings.SecondAscensionEnabled;
+        LibraryRunSettings.ExperimentalContentEnabled && LibraryRunSettings.SecondAscensionEnabled;
 
     public static int Clamp(int level) => Math.Clamp(level, 0, LibrarySecondAscensionConfig.MaxLevel);
 

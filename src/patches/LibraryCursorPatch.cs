@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using Godot;
 using HarmonyLib;
+using LibraryOfRuina.core.settings;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Nodes;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
@@ -32,6 +33,11 @@ internal static class LibraryCursorPatch
 
     public static void Apply(NCursorManager cursorManager)
     {
+        if (!LibraryOfRuinaSettings.RuntimeSideEffectsEnabled)
+        {
+            return;
+        }
+
         try
         {
             var defaultCursor = _defaultCursor ??= LoadImage(CursorDefaultPath);
