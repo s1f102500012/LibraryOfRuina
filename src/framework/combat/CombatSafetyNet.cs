@@ -81,17 +81,17 @@ internal static class CombatSafetyNet
     public static Task<AttackCommand> WrapMonsterAttackTask(Task<AttackCommand> task, AttackCommand command)
     {
         // A synchronously completed attack (instant fast mode, non-interactive waits, an attacker
-        // that was already dead) must get the same death check: completion timing differs between
+        // that was already dead) must get the same abort check: completion timing differs between
         // clients and must not decide whether the rest of the move runs.
         if (task.IsCompletedSuccessfully)
         {
             Creature? attacker = task.Result?.Attacker ?? command.Attacker;
-            return attacker != null && IsDeadPerformingMonster(attacker)
-                ? Task.FromException<AttackCommand>(new DeadMonsterAttackAbortedException(attacker))
+            return attacker != null && TryGetMoveAbortReason(attacker, out string reason)
+                ? Task.FromException<AttackCommand>(new MonsterMoveAbortedException(attacker, reason))
                 : task;
         }
 
-        return AwaitMonsterAttackWithDeadAttackerGuard(task, command);
+        return AwaitMonsterAttackWithMoveAbortGuard(task, command);
     }
 
     // Only the abort signal this class raises itself is handled. Anything else thrown inside a move
@@ -103,30 +103,30 @@ internal static class CombatSafetyNet
         {
             await task;
         }
-        catch (DeadMonsterAttackAbortedException exception)
+        catch (MonsterMoveAbortedException exception)
         {
-            await RecoverFromDeadMonsterAttackAbort(context, exception);
+            await RecoverFromAbortedMonsterMove(context, exception);
         }
     }
 
-    private static async Task<AttackCommand> AwaitMonsterAttackWithDeadAttackerGuard(
+    private static async Task<AttackCommand> AwaitMonsterAttackWithMoveAbortGuard(
         Task<AttackCommand> task,
         AttackCommand command)
     {
         AttackCommand? result = await task;
         AttackCommand resolved = result ?? command;
         Creature? attacker = resolved.Attacker ?? command.Attacker;
-        if (attacker != null && IsDeadPerformingMonster(attacker))
+        if (attacker != null && TryGetMoveAbortReason(attacker, out string reason))
         {
-            throw new DeadMonsterAttackAbortedException(attacker);
+            throw new MonsterMoveAbortedException(attacker, reason);
         }
 
         return resolved;
     }
 
-    private static async Task RecoverFromDeadMonsterAttackAbort(
+    private static async Task RecoverFromAbortedMonsterMove(
         CombatSafetyContext context,
-        DeadMonsterAttackAbortedException exception)
+        MonsterMoveAbortedException exception)
     {
         CombatSafetyContext resolvedContext = context with
         {
@@ -135,11 +135,11 @@ internal static class CombatSafetyNet
             Monster = context.Monster ?? exception.Attacker.Monster
         };
         Log.Info(
-            "[" + LogTag + "] 中止死亡敌人的剩余招式：" + DescribeCaughtError(exception)
+            "[" + LogTag + "] 中止无法继续出招的怪物的剩余招式：" + DescribeCaughtError(exception)
             + "；context=" + DescribeContext(resolvedContext));
 
-        // Deterministic state work on every client (the death that triggered the abort is
-        // synchronized), so nothing here is caught: a failure must surface like in vanilla.
+        // Deterministic state work on every client (the death or removal that triggered the abort
+        // is synchronized), so nothing here is caught: a failure must surface like in vanilla.
         // Mirrors the part of vanilla MonsterModel.PerformMove that the abort skipped.
         if (resolvedContext.Monster is { } monster)
         {
@@ -165,17 +165,47 @@ internal static class CombatSafetyNet
         }
     }
 
-    private static bool IsDeadPerformingMonster(Creature? attacker)
+    // After an attack, a performing monster of this mod cannot go on with its move when the attack
+    // killed it (its own counters) or took it out of a combat that is still running (its hit
+    // finished a liberation phase and the phase cleanup removed the attacker). The rest of a move
+    // assumes a live combat state, like vanilla moves do: commands such as GainBlock pass the
+    // creature's null CombatState to hook dispatch and throw, which kills the turn loop.
+    private static bool TryGetMoveAbortReason(Creature attacker, out string reason)
     {
+        reason = "";
         try
         {
-            return attacker is { IsMonster: true, IsDead: true, Monster.IsPerformingMove: true };
+            if (attacker is not { IsMonster: true, Monster.IsPerformingMove: true })
+            {
+                return false;
+            }
+
+            if (attacker.IsDead)
+            {
+                reason = "攻击者已死亡";
+                return true;
+            }
+
+            if (HasLeftRunningCombat(attacker))
+            {
+                reason = "攻击者已被移出仍在进行的战斗";
+                return true;
+            }
+
+            return false;
         }
         catch
         {
             return false;
         }
     }
+
+    // Only while the combat still runs: once it is over or ending, vanilla commands return early on
+    // their own, so the rest of the move stays as it was. Containment is checked first because
+    // IsOverOrEnding dispatches the ShouldStopCombatFromEnding hooks.
+    private static bool HasLeftRunningCombat(Creature creature) =>
+        creature.CombatState?.ContainsCreature(creature) != true
+        && CombatManager.Instance is { IsInProgress: true, IsOverOrEnding: false };
 
     private static string DescribeCaughtError(Exception exception)
     {
@@ -244,7 +274,7 @@ internal static class CombatSafetyNet
         }
     }
 
-    private sealed class DeadMonsterAttackAbortedException(Creature attacker) : Exception
+    private sealed class MonsterMoveAbortedException(Creature attacker, string reason) : Exception(reason)
     {
         public Creature Attacker { get; } = attacker;
     }
