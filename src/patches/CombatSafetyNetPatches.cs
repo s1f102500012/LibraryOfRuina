@@ -52,8 +52,10 @@ internal static class CombatSafetyMonsterPerformMovePatch
 
 /// <summary>
 /// Vanilla AttackCommand stops hitting once its attacker dies, but the rest of the monster's move
-/// keeps running on a dead creature. For this mod's monsters (which can die to their own counters
-/// mid-move) the remainder of the move is aborted and finalized by the PerformMove wrapper above.
+/// keeps running on a dead creature. This mod's monsters can also die to their own counters
+/// mid-move, or be removed from the running combat by a liberation phase cleanup that their own hit
+/// triggered; in both cases the remainder of the move is aborted and finalized by the PerformMove
+/// wrapper above.
 /// </summary>
 [HarmonyPatch(typeof(AttackCommand), nameof(AttackCommand.Execute))]
 internal static class CombatSafetyAttackCommandExecutePatch

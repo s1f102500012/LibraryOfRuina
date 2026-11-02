@@ -313,7 +313,10 @@ public static class AllyTurnRegistry
 
             MarkAsActed(ally, provider);
 
-            if (ally.IsAlive && combatManager.IsInProgress)
+            // 行动可能让盟友离场（击杀搭档触发转阶段清场），离场后不再为它准备下一回合，同原版敌方回合的 ContainsCreature 检查。
+            if (ally.IsAlive
+                && combatManager.IsInProgress
+                && combatState.ContainsCreature(ally))
             {
                 ally.PrepareForNextTurn(combatState.Enemies);
             }

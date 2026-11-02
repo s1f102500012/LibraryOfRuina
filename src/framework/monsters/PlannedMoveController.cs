@@ -153,7 +153,7 @@ internal sealed class PlannedMoveController<TMove>
     }
 
     /// <summary>
-    /// 从第一个槽位起逐个执行。每个槽位执行前检查 <paramref name="canContinue"/>，槽位读到空值就停；
+    /// 从第一个槽位起逐个执行。每个槽位执行前检查 <paramref name="canContinue"/> 与执行者仍在战斗中，槽位读到空值就停；
     /// 每个招式执行完检查 <paramref name="stopAfterMove"/>，为真就停。缺省时槽位在执行时逐个读取，
     /// 招式执行中改动了后面的槽位（清空、左移）会影响后面执行什么；<paramref name="readAllFirst"/> 为真时
     /// 开始前一次读完前 <paramref name="slotLimit"/> 个槽位，按这份快照执行（钴蓝伤痕）。
@@ -176,7 +176,7 @@ internal sealed class PlannedMoveController<TMove>
             }
         }
 
-        for (int slot = 0; slot < limit && canContinue(); slot++)
+        for (int slot = 0; slot < limit && canContinue() && IsOwnerInCombat(); slot++)
         {
             TMove move = snapshot != null ? snapshot[slot] : _readSlot(slot);
             if (IsEmpty(move))
@@ -191,6 +191,10 @@ internal sealed class PlannedMoveController<TMove>
             }
         }
     }
+
+    // 招式可能让执行者离场（击杀搭档触发转阶段清场会把它移出战斗），离场后剩余槽位不再对它结算。
+    private bool IsOwnerInCombat() =>
+        _owner.Creature.CombatState?.ContainsCreature(_owner.Creature) == true;
 
     private void RefreshView(AbstractIntent[] intents)
     {
