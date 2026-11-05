@@ -237,9 +237,12 @@ public sealed class ForgottenKnightSword : LorMonsterModel
         _hasReceivedTeardrop = false;
     }
 
+    private bool HasLivingKnight =>
+        DespairKnight.GetKnights(Creature.CombatState).Any(static knight => knight.Creature.IsAlive);
+
     public bool CanEnterFalseDeath(Creature creature)
     {
-        return creature == Creature && !_isFakeDead;
+        return creature == Creature && !_isFakeDead && HasLivingKnight;
     }
 
     public async Task EnterFalseDeath()
@@ -256,6 +259,12 @@ public sealed class ForgottenKnightSword : LorMonsterModel
             {
                 knight.QueueDespair();
             }
+        }
+
+        // 假死扣血可能直接击杀骑士；骑士死亡时已让本剑真正死亡，不再进入假死。
+        if (!HasLivingKnight)
+        {
+            return;
         }
 
         _fakeDeathRecoveryMoveId = ResolveRecoveryMoveId();
@@ -616,6 +625,12 @@ public sealed class ForgottenKnightSword : LorMonsterModel
             await LibraryCreatureCmd.SetCurrentChaoValue(lc, lc.MaxChaoValue);
             lc.HealthBar?.RefreshValues();
         }
+    }
+
+    public async Task DieWithKnight()
+    {
+        ResetFalseDeathState();
+        await CreatureCmd.Kill(Creature);
     }
 
     private async Task ForceFakeDeathChaoZero()

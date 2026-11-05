@@ -196,7 +196,7 @@ public sealed class DespairKnight : LorMonsterModel
         return Task.CompletedTask;
     }
 
-    public override Task AfterDeath(
+    public override async Task AfterDeath(
         PlayerChoiceContext choiceContext,
         Creature creature,
         bool wasRemovalPrevented,
@@ -204,12 +204,28 @@ public sealed class DespairKnight : LorMonsterModel
     {
         if (wasRemovalPrevented || creature != Creature)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         AddDespairKnightPageRewards();
         StopCryingLoop();
-        return Task.CompletedTask;
+        await KillSwordsWithKnight();
+    }
+
+    /// <summary>
+    /// 骑士死亡后遗忘之剑失去假死依托，包括正处于假死中的剑在内全部真正死亡，避免战斗无法结束。
+    /// </summary>
+    private async Task KillSwordsWithKnight()
+    {
+        if (GetKnights(Creature.CombatState).Any(static knight => knight.Creature.IsAlive))
+        {
+            return;
+        }
+
+        foreach (ForgottenKnightSword sword in GetSwords(Creature.CombatState))
+        {
+            await sword.DieWithKnight();
+        }
     }
 
     public void QueueDespair()
